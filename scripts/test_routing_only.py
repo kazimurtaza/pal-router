@@ -28,7 +28,6 @@ def test_trained_router():
     try:
         trained_router = TrainedRouter(
             model_dir="models/router_classifier",
-            confidence_threshold=0.0,  # Always use classifier
         )
     except Exception as e:
         print(f"Failed to load trained router: {e}")
@@ -40,7 +39,7 @@ def test_trained_router():
         results.append({
             "query": query["prompt"][:60] + "..." if len(query["prompt"]) > 60 else query["prompt"],
             "expected": query["expected_lane"],
-            "predicted": prediction.lane.value,
+            "predicted": str(prediction.lane),
             "confidence": prediction.confidence,
         })
 

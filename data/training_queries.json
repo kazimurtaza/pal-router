@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "queries": [
     {
       "text": "What is the capital of France?",
@@ -240,6 +240,558 @@
     {
       "text": "How many ways can you arrange the letters in the word 'MATH'?",
       "lane": "AGENTIC"
+    },
+    {
+      "text": "What is the capital of Germany?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the capital of Japan?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the capital of Australia?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the capital of Brazil?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the capital of Canada?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who invented the telephone?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who discovered penicillin?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote Pride and Prejudice?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who painted Starry Night?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who composed Symphony No. 5?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What year did World War II end?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What year was the moon landing?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the chemical symbol for gold?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the chemical symbol for oxygen?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the boiling point of water?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many planets are in our solar system?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the largest mammal?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the smallest country in the world?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What language is spoken in Brazil?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the currency of Japan?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Translate 'goodbye' to French",
+      "lane": "FAST"
+    },
+    {
+      "text": "Translate 'thank you' to German",
+      "lane": "FAST"
+    },
+    {
+      "text": "How do you say 'yes' in Italian?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 'water' in Spanish?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is photosynthesis?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Define democracy",
+      "lane": "FAST"
+    },
+    {
+      "text": "What does 'ubiquitous' mean?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Explain what a noun is",
+      "lane": "FAST"
+    },
+    {
+      "text": "Write a haiku about nature",
+      "lane": "FAST"
+    },
+    {
+      "text": "Give me a short poem about the moon",
+      "lane": "FAST"
+    },
+    {
+      "text": "What rhymes with 'cat'?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is the Earth round?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is water wet?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Can birds fly?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Do fish have lungs?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is the sun a star?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What color is grass?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many legs does a spider have?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What sound does a cow make?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Name three fruits",
+      "lane": "FAST"
+    },
+    {
+      "text": "List five colors",
+      "lane": "FAST"
+    },
+    {
+      "text": "Should AI systems be given rights?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Is it ethical to use animals in medical research?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethics of genetic engineering in humans",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the moral implications of self-driving cars?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Is capital punishment ever justified?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare socialism and capitalism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the differences between Stoicism and Epicureanism?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Contrast Eastern and Western philosophy",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the French and American revolutions",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the pros and cons of nuclear energy?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain quantum entanglement and its implications",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How does climate change affect biodiversity?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the butterfly effect in chaos theory",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the relationship between language and thought",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How does social media influence democracy?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What strategies can reduce income inequality?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How should governments approach AI regulation?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are effective approaches to conflict resolution?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss strategies for sustainable urban development",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How can organizations foster innovation?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the impact of globalization from different viewpoints",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss vaccination from medical, social, and political perspectives",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Examine the gig economy from worker and business perspectives",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze space exploration priorities: science vs colonization",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss free speech limits from various ethical frameworks",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What factors led to the fall of the Roman Empire?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How did the printing press change society?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the causes and effects of the Great Depression",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How has technology changed warfare throughout history?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the evolution of human rights concepts",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What is the meaning of consciousness?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Is free will an illusion?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ship of Theseus paradox",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What makes something art?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Can machines ever truly understand meaning?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Calculate 23% of 847",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 15% tip on a $127.50 bill?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate 8.5% sales tax on $249.99",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 12.5% of 3200?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the compound interest on $5000 at 3.5% for 7 years",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 18% annual interest on a $15000 loan?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A store has a 30% off sale, then takes an additional 15% off. What is the final price of a $200 item?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If a car gets 32 miles per gallon and gas costs $3.89 per gallon, how much does it cost to drive 450 miles?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangle has a perimeter of 56 cm. If the length is 3 times the width, what are the dimensions?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "John earns $4200 per month. He spends 28% on rent, 15% on food, and 8% on utilities. How much is left?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A pool fills at 15 gallons per minute but leaks 3 gallons per minute. How long to fill a 720 gallon pool?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Schedule 4 meetings of 30 minutes each between 9am and 12pm with 15 minute breaks between them",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Distribute $1000 between savings (at least 40%), investments (at least 20%), and spending",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Allocate 8 hours between work, exercise (min 1 hour), meals (1.5 hours total), and leisure",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Divide 24 students into groups of 4, 5, or 6 with at least 4 groups",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If A is taller than B, B is taller than C, and D is shorter than C, rank them by height",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Alice, Bob, and Carol finished a race. Alice wasn't first. Bob beat Carol. Who won?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "In a family of 5, there are 2 parents and 3 children. At least one child is a boy. The oldest is a girl. What are possible gender combinations?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If all roses are flowers and some flowers fade quickly, what can we conclude about roses?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 2x + 7 = 3x - 5",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If 3y - 12 = 2y + 8, what is y?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find x if 4(x - 3) = 2(x + 5)",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve the system: x + y = 10, x - y = 4",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the area of a triangle with base 12 cm and height 8 cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is the volume of a cylinder with radius 5 cm and height 10 cm?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the hypotenuse of a right triangle with legs 9 and 12",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the circumference of a circle with diameter 14 inches",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is the average of 23, 45, 67, 89, and 101?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the median of: 12, 45, 23, 67, 34, 56, 78",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If you flip a coin 3 times, what's the probability of getting exactly 2 heads?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bag has 5 red and 3 blue marbles. What's the probability of picking 2 red in a row?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If I leave at 9:45 AM and arrive at 2:15 PM, how long was the journey?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A flight takes 7 hours 40 minutes. If it departs at 11:30 PM, what time does it arrive?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many minutes are there between 8:17 AM and 3:52 PM?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Convert 72 km/h to m/s",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many seconds in 2.5 hours?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If a recipe needs 2.5 cups and I'm making 1.5x the recipe, how many cups do I need?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate monthly payments for a $250,000 mortgage at 4.5% over 30 years",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If I save $400/month with 5% annual return, how much after 10 years?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A stock goes from $45 to $52. What is the percentage gain?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the present value of $10,000 in 5 years at 6% discount rate",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many ways can you arrange 5 books on a shelf?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "In how many ways can you choose 3 people from a group of 8?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many 4-digit PINs are possible with digits 0-9?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many different 3-letter combinations can be made from A, B, C, D, E?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many months are in a year?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many hours are in a day?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many states are in the USA?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many letters are in the alphabet?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many players are on a basketball team?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many sides does a hexagon have?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many strings does a guitar have?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 10 - 3?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 5 times 6?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 100 divided by 10?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is half of 20?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after 1, 2, 3?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the next letter after A, B, C?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Given the sequence 2, 4, 6, 8, what comes next?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Given the sequence 1, 2, 4, 8, what comes next?",
+      "lane": "FAST"
+    },
+    {
+      "text": "If x = 5, what is x + 1?",
+      "lane": "FAST"
+    },
+    {
+      "text": "If y = 10, what is y - 5?",
+      "lane": "FAST"
     }
   ]
 }

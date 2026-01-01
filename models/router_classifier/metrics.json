@@ -1,9 +1,9 @@
 {
-  "cv_accuracy": 0.7977777777777777,
-  "cv_std": 0.1399117887884195,
-  "test_accuracy": 0.75,
-  "n_train": 48,
-  "n_test": 12,
+  "cv_accuracy": 0.7346774193548388,
+  "cv_std": 0.08400123645713045,
+  "test_accuracy": 0.9,
+  "n_train": 158,
+  "n_test": 40,
   "embedding_model": "fast",
-  "classifier_type": "logistic"
+  "classifier_type": "mlp"
 }

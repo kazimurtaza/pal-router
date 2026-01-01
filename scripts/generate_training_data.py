@@ -86,7 +86,7 @@ def generate_with_gemini(prompt: str) -> list[str]:
     """Generate queries using Gemini."""
     import google.generativeai as genai
 
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+    genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
     model = genai.GenerativeModel("gemini-1.5-flash")
 
     response = model.generate_content(prompt)
