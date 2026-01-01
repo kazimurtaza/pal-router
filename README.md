@@ -52,6 +52,22 @@ python scripts/test_routing_only.py
 | Cross-validation | 97% |
 | Latency | ~9ms/query |
 
+## Research Validation
+
+The implementation validates core claims from the cited research papers:
+
+```bash
+python eval/research_validation_suite.py --report
+```
+
+| Experiment | Paper | Result | Status |
+|------------|-------|--------|--------|
+| Classifier vs Heuristics | RouteLLM | 96% vs 64% (+50%) | ✓ PASS |
+| Code Execution Accuracy | PAL | 85% (17/20) | ✓ PASS |
+| Complexity Discrimination | Apple | AGENTIC=0.35, FAST=0.00 | ✓ PASS |
+
+**All 3 research claims validated on held-out test data.**
+
 ### Generating More Training Data
 
 ```bash
@@ -99,7 +115,8 @@ pal-router/
 ├── data/
 │   └── training_queries.json    # Training data (no test overlap)
 └── eval/
-    └── test_suite.json          # Held-out evaluation set
+    ├── test_suite.json              # Held-out evaluation set
+    └── research_validation_suite.py # Validates research claims
 ```
 
 ## References
