@@ -28,21 +28,43 @@ cp .env.example .env
 
 ## Training the Router
 
-The router requires a trained classifier. Train it on your data:
+The router requires a trained classifier:
 
 ```bash
-# Convert test suite to training format
-python scripts/convert_test_suite.py
-
-# Optional: Augment with more examples
+# Create/augment training data (avoiding test contamination)
+python scripts/create_clean_split.py
 python scripts/augment_training_data.py
 
 # Train the classifier
 python scripts/train_router_classifier.py
 
-# Test accuracy
+# Evaluate on held-out test set
 python scripts/test_routing_only.py
 ```
+
+### Current Results
+
+| Metric | Value |
+|--------|-------|
+| Training queries | 138 |
+| Held-out test queries | 60 |
+| **Test accuracy** | **66.7%** (40/60) |
+| Latency | ~9ms/query |
+
+### Improving Accuracy
+
+The current model needs more training data. To improve:
+
+1. **Generate synthetic data** with an LLM:
+   ```bash
+   python scripts/generate_training_data.py --provider groq --count 100
+   ```
+
+2. **Add domain-specific examples** to `scripts/augment_training_data.py`
+
+3. **Target weak classes** (REASONING needs more examples)
+
+Expected accuracy with 500+ training samples: >85%
 
 ## Usage
 
@@ -57,12 +79,6 @@ print(result.decision.confidence)  # 0.87
 print(result.answer)               # $30.00
 ```
 
-## Results
-
-- **Classifier accuracy:** 95% (57/60 on test suite)
-- **Latency:** ~9ms per routing decision
-- **Training data:** 198 labeled queries
-
 ## Project Structure
 
 ```
@@ -75,13 +91,16 @@ pal-router/
 │   └── complexity.py      # Complexity signal extraction
 ├── scripts/
 │   ├── train_router_classifier.py
+│   ├── create_clean_split.py    # Prevents train/test contamination
 │   ├── augment_training_data.py
 │   └── test_routing_only.py
 ├── models/router_classifier/
 │   ├── classifier.pkl
 │   └── label_encoder.pkl
-└── data/
-    └── training_queries.json
+├── data/
+│   └── training_queries.json    # Training data (no test overlap)
+└── eval/
+    └── test_suite.json          # Held-out evaluation set
 ```
 
 ## References
