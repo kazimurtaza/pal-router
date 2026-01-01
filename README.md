@@ -46,25 +46,24 @@ python scripts/test_routing_only.py
 
 | Metric | Value |
 |--------|-------|
-| Training queries | 138 |
+| Training queries | 457 (no test overlap) |
 | Held-out test queries | 60 |
-| **Test accuracy** | **66.7%** (40/60) |
+| **Test accuracy** | **91.7%** (55/60) |
+| Cross-validation | 97% |
 | Latency | ~9ms/query |
 
-### Improving Accuracy
+### Generating More Training Data
 
-The current model needs more training data. To improve:
+```bash
+# Generate with Groq LLM
+python scripts/generate_with_groq.py --batches 2
 
-1. **Generate synthetic data** with an LLM:
-   ```bash
-   python scripts/generate_training_data.py --provider groq --count 100
-   ```
+# Add edge cases for specific patterns
+python scripts/add_edge_cases.py
 
-2. **Add domain-specific examples** to `scripts/augment_training_data.py`
-
-3. **Target weak classes** (REASONING needs more examples)
-
-Expected accuracy with 500+ training samples: >85%
+# Retrain
+python scripts/train_router_classifier.py
+```
 
 ## Usage
 

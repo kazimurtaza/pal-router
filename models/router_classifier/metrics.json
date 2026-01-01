@@ -1,9 +1,9 @@
 {
-  "cv_accuracy": 0.6090909090909091,
-  "cv_std": 0.185418891403374,
-  "test_accuracy": 0.6071428571428571,
-  "n_train": 110,
-  "n_test": 28,
+  "cv_accuracy": 0.8986301369863015,
+  "cv_std": 0.026843723208582772,
+  "test_accuracy": 0.967391304347826,
+  "n_train": 365,
+  "n_test": 92,
   "embedding_model": "fast",
   "classifier_type": "mlp"
 }

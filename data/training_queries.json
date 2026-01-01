@@ -1,6 +1,6 @@
 {
-  "version": "2.0.0",
-  "note": "Test suite queries removed to prevent train/test contamination",
+  "version": "3.2.0",
+  "note": "Added edge cases for misclassified queries",
   "queries": [
     {
       "text": "What is the capital of Germany?",
@@ -553,6 +553,1282 @@
     {
       "text": "If y = 10, what is y - 5?",
       "lane": "FAST"
+    },
+    {
+      "text": "What is the largest planet?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is fire hot?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 2 + 0?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Define happiness",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote To Kill a Mockingbird?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is the sky blue?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is after A, B?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 5 - 0?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the definition of love?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the smallest country?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who discovered America?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is ice cold?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after Monday?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 1 x 1?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is after C, D?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 0 x 9?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the capital of China?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who was Albert Einstein?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is after January?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 9 - 0?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the definition of science?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the deepest ocean?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote Harry Potter?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is the sun yellow?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after 4, 5?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 7 - 1?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who was Marie Curie?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is snow white?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is after June?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 3 x 0?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the largest bird?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote The Lord of the Rings?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is glass transparent?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after D, E?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 2 x 2?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who was Charles Darwin?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Is metal hard?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Hello in Spanish?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Five plus zero?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote Romeo?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is DNA?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Capital of Japan?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Two times two?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a haiku?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the sun?",
+      "lane": "FAST"
+    },
+    {
+      "text": "One minus zero?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a noun?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Capital of Brazil?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a volcano?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Zero divided by one?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who is Einstein?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a river?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after D, E, F?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Define computer",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a mountain?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who wrote Pride?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a tree?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Capital of China?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a flower?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a pen?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a book?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a dog?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What comes after 5, 10, 15?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a car?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Who is Shakespeare?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the moon?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a bike?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a phone?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Define internet",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is a cloud?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Analyze the morality of whistleblowing in corporate settings",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the pros and cons of universal basic income",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the impact of social media on mental health",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the strategic implications of climate change on global economies?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of democracy in modern societies",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the philosophical underpinnings of existentialism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the benefits and drawbacks of veganism and vegetarianism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical context of the American Civil Rights Movement",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethical considerations of genetic engineering",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the long-term consequences of imperialism on native cultures?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the trade-offs between economic growth and environmental protection",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of personal identity and its implications",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the educational systems of Finland and the United States",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of artificial intelligence in modern warfare",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the societal impact of the #MeToo movement",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the moral implications of autonomous vehicles",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of non-violent resistance in achieving social change",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the philosophical concept of free will and determinism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the economic systems of China and the United States",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethical considerations of organ donation and transplantation",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical context of the Russian Revolution",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the strategic implications of cybersecurity threats on national security?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the benefits and drawbacks of a universal healthcare system",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of cultural relativism and its implications",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the environmental policies of developed and developing countries",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the impact of colonialism on indigenous cultures",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the moral implications of animal testing in scientific research",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the long-term consequences of deforestation on global ecosystems?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of international cooperation in achieving global peace",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the philosophical concept of morality and its relationship to culture",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the social welfare systems of European countries",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of technology in exacerbating social inequalities",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical context of the Civil War and its ongoing impact",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the ethical considerations of space exploration and colonization?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the trade-offs between individual freedom and national security",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of postmodernism and its implications on society",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the educational outcomes of public and private schools",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the impact of globalization on local economies and cultures",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the moral implications of human enhancement technologies",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the strategic implications of renewable energy on global politics?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of feminist movements in achieving social change",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the philosophical concept of justice and its relationship to power",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the healthcare systems of developed and developing countries",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of social media in shaping public opinion and discourse",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the moral implications of autonomous vehicles",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare utilitarianism and deontology",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethics of climate change mitigation",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the trade-offs between economic growth and environmental protection?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the pros and cons of universal basic income",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of moral relativism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider multiple perspectives on the death penalty",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Develop a strategic plan for addressing global poverty",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical context of social justice movements",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the philosophical underpinnings of democracy",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare and contrast Eastern and Western philosophical traditions",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the ethical considerations of gene editing?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of different approaches to conflict resolution",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider the implications of a post-scarcity economy",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of empathy in moral decision-making",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the relationship between technology and human relationships",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the benefits and drawbacks of different economic systems",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Develop a plan for addressing systemic inequality",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of cultural relativism",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the trade-offs between individual freedom and collective security",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider multiple perspectives on the impact of social media on society",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethical implications of animal testing",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical development of human rights",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare and contrast different models of healthcare systems",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the moral implications of space exploration?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of different approaches to education reform",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider the implications of a global basic income guarantee",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of power dynamics in shaping social norms",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the relationship between language and thought",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the benefits and drawbacks of different forms of governance",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Develop a strategic plan for addressing the refugee crisis",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of existential risk",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the trade-offs between economic efficiency and social welfare",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider multiple perspectives on the impact of globalization",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the ethical implications of biometric surveillance",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the historical context of feminist movements",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare and contrast different models of sustainable development",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the moral implications of artificial general intelligence?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the effectiveness of different approaches to disaster response",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Consider the implications of a universal language",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Discuss the role of personal responsibility in shaping individual outcomes",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the relationship between culture and cognitive bias",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the benefits and drawbacks of different forms of energy production",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Develop a plan for addressing the digital divide",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the concept of emergent properties in complex systems",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Evaluate the trade-offs between short-term and long-term thinking",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Calculate 25% discount on $240.80",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A car travels 75mph for 3.5 hours. How far?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve 2x - 5 = 11",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the area of a rectangle with length 8cm and width 5cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A baker sells 250 loaves at $2.50 each. What is the total revenue?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the volume of a cylinder with radius 4cm and height 10cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person invests $1000 at 5% annual interest. How much after 2 years?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: x/4 + 2 = 9",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A water tank can hold 5000 liters. If 1200 liters are already filled, what percentage is filled?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bookshelf has 5 shelves, and each shelf can hold 8 books. If it is currently empty, what is the total number of books it can hold?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the perimeter of a triangle with sides 3cm, 4cm, and 5cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A group of friends want to split a bill of $120. If there are 8 friends, how much will each pay?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the compound interest on $5000 at 3% annual interest for 5 years",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 2x + 5 = 17",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person travels 200 miles in 4 hours. What is their average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the area of a circle with radius 6cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A store has a 15% sale on all items. If a shirt originally costs $80, how much will it cost during the sale?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person has $1000 to invest. They invest $400 at 2% annual interest and $600 at 4% annual interest. What is the total interest earned after 1 year?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: x - 3 = 7",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangular prism has a length of 6cm, a width of 4cm, and a height of 2cm. What is its volume?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A car rental company charges $40 per day plus $0.25 per mile. If a person rents a car for 3 days and drives 150 miles, what is the total cost?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the surface area of a sphere with radius 8cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person buys 2 tickets to a concert for $50 each. If there is an 8% sales tax, how much will they pay in total?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 4x - 2 = 22",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bakery sells 150 cupcakes at $2.25 each. What is the total revenue?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A water bottle can hold 2000ml of water. If 300ml of water are already in the bottle, what percentage is filled?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person travels from city A to city B at an average speed of 60mph. If the distance is 240 miles, how long does the trip take?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the area of a trapezoid with bases 5cm and 7cm, and height 3cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A store has a buy-one-get-one-free sale on all items. If a shirt originally costs $60, how much will 2 shirts cost during the sale?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the interest on $2000 at 6% annual interest for 3 years",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 3x + 2 = 20",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person has $500 to invest. They invest $200 at 5% annual interest and $300 at 3% annual interest. What is the total interest earned after 1 year?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangular garden has a length of 10m and a width of 5m. What is its perimeter?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the volume of a cone with radius 5cm and height 10cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A car travels 30 miles in 0.5 hours. What is its average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 2x - 4 = 12",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A group of friends want to split a bill of $180. If there are 6 friends, how much will each pay?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person buys 3 tickets to a movie for $15 each. If there is a 10% sales tax, how much will they pay in total?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the compound interest on $8000 at 4% annual interest for 2 years",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the surface area of a rectangular prism with length 8cm, width 5cm, and height 3cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bakery sells 80 cakes at $3.50 each. What is the total revenue?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A water tank can hold 10000 liters. If 2500 liters are already filled, what percentage is filled?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person travels from city A to city B at an average speed of 40mph. If the distance is 160 miles, how long does the trip take?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: x/2 + 1 = 6",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A store has a 20% discount on all items. If a shirt originally costs $90, how much will it cost during the sale?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate 25% discount on $120.00",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 12% of $450?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A cylinder has radius 4cm and height 10cm. Find its volume.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bus travels 60km in 2 hours. What is its average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A water tank can hold 2400 liters. If 1200 liters are already filled, what percentage is filled?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the perimeter of a triangle with sides 6cm, 8cm, and 10cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bakery sells 480 loaves of bread at $2 each. How much money does it make in total?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve 4x + 2 = 26",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person invests $1000 at 5% interest for 2 years. How much will they have after 2 years?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is the volume of a cube with side length 7cm?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A plane travels 800km in 4 hours. How far does it travel per hour?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A company has 480 employees and wants to give a 15% raise to each employee. If the average salary is $50,000, how much more will the company pay in total after the raise?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 2x - 3 = 7",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangular prism has length 8cm, width 5cm, and height 3cm. Find its volume.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bike travels 25km in 2 hours. What is its average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the probability of rolling a 6 on a fair six-sided die",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve 3x + 1 = 16",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A cylinder has radius 3cm and height 8cm. Find its surface area.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A car travels 40km in 1 hour. How far can it travel in 5 hours?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 8% of $200?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the area of a trapezoid with bases 6cm and 8cm, and height 4cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A company has $10,000 to invest at 4% interest for 1 year. How much will it have after 1 year?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A sphere has radius 5cm. Find its volume.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A person runs 12km in 2 hours. What is their average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the perimeter of a rectangle with length 10cm and width 6cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A water bottle can hold 1.5 liters. If it is currently filled with 0.8 liters, what percentage is filled?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve 2x - 2 = 10",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangular prism has length 12cm, width 8cm, and height 4cm. Find its surface area.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A plane travels 1200km in 6 hours. How far does it travel per hour?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the probability of rolling an even number on a fair six-sided die",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve 5x + 3 = 28",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A cylinder has radius 2cm and height 6cm. Find its volume.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A bike travels 30km in 3 hours. What is its average speed?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 12% of $300?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the area of a triangle with base 8cm and height 6cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A company has 360 employees and wants to give a 10% raise to each employee. If the average salary is $60,000, how much more will the company pay in total after the raise?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Solve for x: 3x - 2 = 14",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A rectangular prism has length 15cm, width 10cm, and height 6cm. Find its volume.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A car travels 60km in 2 hours. How far can it travel in 4 hours?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the perimeter of a circle with radius 8cm",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If all cats are mammals and all mammals breathe, do all cats breathe?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "All birds have feathers. Penguins are birds. Do penguins have feathers?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If no fish can fly and all trout are fish, can trout fly?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "All squares are rectangles. All rectangles have four sides. How many sides does a square have?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If some dogs bark and all barking animals make noise, what can we conclude?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Tom is older than Sue. Sue is older than Bob. Who is the youngest?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "In a queue, Mary is ahead of John but behind Lisa. What is the order?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Red is darker than blue. Yellow is lighter than blue. Rank the colors by darkness.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A is heavier than B. C is lighter than B. D is heavier than A. Rank by weight.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Team X beat Team Y. Team Y beat Team Z. Team Z beat Team W. Who is best?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A code must have 6 digits, at least 2 odd numbers. What's max even digits?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A team needs 5 members: at least 2 seniors, at least 1 junior. How many options?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "A meal must have protein, vegetable, grain. I have 3 proteins, 4 veggies, 2 grains. How many combos?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "It rained yesterday. When it rains, the grass gets wet. Is the grass wet?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If power is out, the fridge stops. The milk spoils if the fridge stops. Power went out. What happens to milk?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Plants need sunlight to grow. It was cloudy all week. What happened to the plants?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is 15% of 67?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate 8.5% tax on $129.99",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "What is the average of 23, 45, 67, and 89?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many seconds in 3 hours and 45 minutes?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If a car gets 28 mpg and gas is $3.50/gallon, cost for 200 miles?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If x equals 5, what is x?",
+      "lane": "FAST"
+    },
+    {
+      "text": "If the answer is 42, what is the answer?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Given y = 10, what is y?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What number comes after 1, 2, 3, 4?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Complete the pattern: A, B, C, D, ?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the next even number after 8?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 1 + 1?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 10 minus 7?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 2 times 3?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is 8 divided by 2?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is half of 100?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is double 25?",
+      "lane": "FAST"
+    },
+    {
+      "text": "I have 3 apples. I eat 1. How many left?",
+      "lane": "FAST"
+    },
+    {
+      "text": "There are 5 birds. 2 fly away. How many remain?",
+      "lane": "FAST"
+    },
+    {
+      "text": "Does correlation imply causation? Explain.",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Ice cream sales and drownings both rise in summer. Are they related?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Countries with more internet have higher GDP. Does internet cause wealth?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Explain the difference between sympathy and empathy.",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What distinguishes knowledge from belief?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Describe the relationship between rights and responsibilities.",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Should a startup prioritize growth or profitability?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What factors should influence hiring decisions?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How should a company respond to negative reviews?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Compare the benefits of remote vs in-office work.",
+      "lane": "REASONING"
+    },
+    {
+      "text": "What are the trade-offs between speed and accuracy?",
+      "lane": "REASONING"
+    },
+    {
+      "text": "Analyze the pros and cons of open source software.",
+      "lane": "REASONING"
+    },
+    {
+      "text": "How many days are in a week?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many days are in a year?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many weeks are in a year?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many seconds are in a minute?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many minutes are in an hour?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many months have 31 days?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many seasons are there?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many continents exist?",
+      "lane": "FAST"
+    },
+    {
+      "text": "How many oceans are there?",
+      "lane": "FAST"
+    },
+    {
+      "text": "All X are Y. All Y are Z. Are all X definitely Z?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "If A implies B, and B implies C, does A imply C?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "All roses are flowers. All flowers need water. What do roses need?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "No reptiles are mammals. Snakes are reptiles. Are snakes mammals?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "All students passed. John is a student. Did John pass?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Alice finished before Bob but after Carol. What is the order?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "X is greater than Y. Z is less than Y. Rank X, Y, Z.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "First place went to neither Sam nor Alex. Sam beat Alex. Who won?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Summarize this text in one sentence.",
+      "lane": "FAST"
+    },
+    {
+      "text": "Give me a brief summary of the article.",
+      "lane": "FAST"
+    },
+    {
+      "text": "Summarize the key points.",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the main idea of this passage?",
+      "lane": "FAST"
+    },
+    {
+      "text": "What is the sum of numbers from 1 to 50?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the sum of first 20 natural numbers.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Find the sum of all integers from 1 to 200.",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "How many ways to arrange 3 items?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "In how many ways can 4 books be ordered?",
+      "lane": "AGENTIC"
+    },
+    {
+      "text": "Calculate the number of permutations of 5 objects.",
+      "lane": "AGENTIC"
     }
   ]
 }
