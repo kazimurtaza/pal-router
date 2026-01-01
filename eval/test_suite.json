@@ -1,0 +1,494 @@
+{
+  "version": "1.0.0",
+  "description": "Test suite for ternary LLM router evaluation",
+  "queries": [
+    {
+      "id": "factual_01",
+      "prompt": "What is the capital of France?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_02",
+      "prompt": "Who wrote Romeo and Juliet?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_03",
+      "prompt": "What color is the sky on a clear day?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_04",
+      "prompt": "How many continents are there?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_05",
+      "prompt": "What is the chemical symbol for water?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_06",
+      "prompt": "Name three primary colors.",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_07",
+      "prompt": "What planet is known as the Red Planet?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_08",
+      "prompt": "Who painted the Mona Lisa?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_09",
+      "prompt": "What is the largest ocean on Earth?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "factual_10",
+      "prompt": "How many days are in a week?",
+      "expected_lane": "FAST",
+      "category": "factual",
+      "difficulty": "trivial"
+    },
+    {
+      "id": "math_01",
+      "prompt": "A train travels at 60 mph for 2.5 hours, then 45 mph for 1.5 hours. What is the total distance traveled?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "217.5",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "math_02",
+      "prompt": "If I invest $10,000 at 5% annual interest compounded yearly, how much will I have after 3 years?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "11576.25",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "math_03",
+      "prompt": "Calculate the area of a circle with radius 7.5 cm.",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "176.71",
+      "category": "math",
+      "difficulty": "easy"
+    },
+    {
+      "id": "math_04",
+      "prompt": "A store offers 25% off, then an additional 10% off the sale price. What is the total percentage discount?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "32.5",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "math_05",
+      "prompt": "If a recipe calls for 2.5 cups of flour for 12 cookies, how many cups are needed for 30 cookies?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "6.25",
+      "category": "math",
+      "difficulty": "easy"
+    },
+    {
+      "id": "math_06",
+      "prompt": "A car depreciates 15% each year. If it starts at $30,000, what is its value after 4 years?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "15660.19",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "math_07",
+      "prompt": "Calculate the monthly payment for a $200,000 mortgage at 6% annual interest over 30 years.",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "1199.10",
+      "category": "math",
+      "difficulty": "hard"
+    },
+    {
+      "id": "math_08",
+      "prompt": "If you save $500 per month with 4% annual return, how much will you have after 5 years?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "33149.19",
+      "category": "math",
+      "difficulty": "hard"
+    },
+    {
+      "id": "math_09",
+      "prompt": "A tank fills at 5 gallons per minute and drains at 2 gallons per minute. If it starts with 100 gallons, how long until it reaches 250 gallons?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "50",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "math_10",
+      "prompt": "Find the sum of all prime numbers between 1 and 100.",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "1060",
+      "category": "math",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_01",
+      "prompt": "I have 3 boxes. Box A weighs twice as much as Box B. Box C weighs 5kg less than Box A. If the total weight is 35kg, how much does each box weigh?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": {"A": 16, "B": 8, "C": 11},
+      "category": "constraint_solving",
+      "difficulty": "hard"
+    },
+    {
+      "id": "logic_02",
+      "prompt": "Three friends split a restaurant bill. Alice paid $15 more than Bob. Carol paid twice what Bob paid. If the total bill was $105, how much did each person pay?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": {"Alice": 37.5, "Bob": 22.5, "Carol": 45},
+      "category": "constraint_solving",
+      "difficulty": "hard"
+    },
+    {
+      "id": "logic_03",
+      "prompt": "A farmer has chickens and cows. There are 50 heads and 140 legs total. How many of each animal does the farmer have?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": {"chickens": 30, "cows": 20},
+      "category": "constraint_solving",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_04",
+      "prompt": "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops definitely Lazzies?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "yes",
+      "category": "logic",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_05",
+      "prompt": "Given that it rained every day last week, and plants grow when it rains, and the garden has plants, what can we conclude about the garden?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "plants grew",
+      "category": "logic",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_06",
+      "prompt": "A meeting room must have at least 2 managers or at least 3 engineers. If there are 5 people and exactly 1 manager, what's the minimum number of engineers needed?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "3",
+      "category": "constraint_solving",
+      "difficulty": "hard"
+    },
+    {
+      "id": "logic_07",
+      "prompt": "A password must be exactly 8 characters: at least 2 uppercase, at least 2 lowercase, at least 2 digits. What's the maximum number of special characters allowed?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "2",
+      "category": "constraint_solving",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_08",
+      "prompt": "In a race, Alex finished before Blake but after Casey. Dana finished after Blake. What is the order from first to last?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "Casey, Alex, Blake, Dana",
+      "category": "logic",
+      "difficulty": "medium"
+    },
+    {
+      "id": "logic_09",
+      "prompt": "A project takes 10 days with 3 workers. If we want to finish in 5 days, how many workers do we need, assuming linear scaling?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "6",
+      "category": "constraint_solving",
+      "difficulty": "easy"
+    },
+    {
+      "id": "logic_10",
+      "prompt": "You have coins worth 1, 5, and 10 cents. What's the minimum number of coins needed to make exactly 47 cents?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "6",
+      "category": "constraint_solving",
+      "difficulty": "medium"
+    },
+    {
+      "id": "reasoning_01",
+      "prompt": "Explain the trolley problem and its implications for autonomous vehicle ethics.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_02",
+      "prompt": "Compare and contrast the philosophical positions of utilitarianism and deontological ethics.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_03",
+      "prompt": "Analyze the potential long-term societal impacts of widespread AI adoption in healthcare.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_04",
+      "prompt": "Discuss the trade-offs between privacy and security in modern digital systems.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_05",
+      "prompt": "Evaluate the arguments for and against universal basic income from economic, social, and political perspectives.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_06",
+      "prompt": "Explain why correlation does not imply causation, with three distinct examples.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "medium"
+    },
+    {
+      "id": "reasoning_07",
+      "prompt": "Analyze the environmental and ethical considerations of nuclear energy compared to solar and wind power.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_08",
+      "prompt": "Discuss how cognitive biases affect decision-making in business and strategies to mitigate them.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_09",
+      "prompt": "Examine the historical factors that led to the Industrial Revolution and its parallels with the current AI revolution.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "reasoning_10",
+      "prompt": "Critique the concept of infinite economic growth on a finite planet.",
+      "expected_lane": "REASONING",
+      "category": "reasoning",
+      "difficulty": "complex"
+    },
+    {
+      "id": "edge_01",
+      "prompt": "What is 2 + 2?",
+      "expected_lane": "FAST",
+      "expected_answer": "4",
+      "category": "edge",
+      "difficulty": "trivial",
+      "notes": "Simple arithmetic should still go to FAST"
+    },
+    {
+      "id": "edge_02",
+      "prompt": "Summarize the main points of this article about climate change.",
+      "expected_lane": "FAST",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Summarization without source is simple"
+    },
+    {
+      "id": "edge_03",
+      "prompt": "If x = 5, what is x + 3?",
+      "expected_lane": "FAST",
+      "expected_answer": "8",
+      "category": "edge",
+      "difficulty": "trivial",
+      "notes": "Simple substitution"
+    },
+    {
+      "id": "edge_04",
+      "prompt": "Write a haiku about programming.",
+      "expected_lane": "FAST",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Creative but structurally simple"
+    },
+    {
+      "id": "edge_05",
+      "prompt": "Calculate 15% of 80.",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "12",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Borderline - percentage calculation"
+    },
+    {
+      "id": "edge_06",
+      "prompt": "What are the pros and cons of remote work?",
+      "expected_lane": "REASONING",
+      "category": "edge",
+      "difficulty": "medium",
+      "notes": "Requires balanced analysis"
+    },
+    {
+      "id": "edge_07",
+      "prompt": "Translate 'Hello, how are you?' to French.",
+      "expected_lane": "FAST",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Simple translation"
+    },
+    {
+      "id": "edge_08",
+      "prompt": "Given the sequence 2, 4, 8, 16, what comes next?",
+      "expected_lane": "FAST",
+      "expected_answer": "32",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Simple pattern recognition"
+    },
+    {
+      "id": "edge_09",
+      "prompt": "A train leaves at 9:15 AM and arrives at 11:45 AM. How long is the journey?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "2 hours 30 minutes",
+      "category": "edge",
+      "difficulty": "easy",
+      "notes": "Time calculation - borderline"
+    },
+    {
+      "id": "edge_10",
+      "prompt": "Is 17 a prime number?",
+      "expected_lane": "FAST",
+      "expected_answer": "yes",
+      "category": "edge",
+      "difficulty": "trivial",
+      "notes": "Simple factual with numeric element"
+    },
+    {
+      "id": "gsm8k_01",
+      "prompt": "Janet's ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make every day at the farmers' market?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "18",
+      "category": "gsm8k",
+      "difficulty": "medium",
+      "notes": "GSM8K benchmark - multi-step arithmetic"
+    },
+    {
+      "id": "gsm8k_02",
+      "prompt": "A robe takes 2 bolts of blue fiber and half that much white fiber. How many bolts in total does it take?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "3",
+      "category": "gsm8k",
+      "difficulty": "easy",
+      "notes": "GSM8K benchmark - simple arithmetic"
+    },
+    {
+      "id": "gsm8k_03",
+      "prompt": "Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs. This increased the value of the house by 150%. How much profit did he make?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "70000",
+      "category": "gsm8k",
+      "difficulty": "medium",
+      "notes": "GSM8K benchmark - percentage calculation"
+    },
+    {
+      "id": "gsm8k_04",
+      "prompt": "Every day, Wendi feeds each of her chickens three cups of mixed chicken feed, containing seeds, mealworms and vegetables to help keep them healthy. She gives the chickens their feed in three separate meals. In the morning, she gives her flock of chickens 15 cups of feed. In the afternoon, she gives her chickens another 25 cups of feed. How many cups of feed does she need to give her chickens in the final meal of the day if the size of Wendi's flock is 20 chickens?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "20",
+      "category": "gsm8k",
+      "difficulty": "medium",
+      "notes": "GSM8K benchmark - multi-step word problem"
+    },
+    {
+      "id": "gsm8k_05",
+      "prompt": "Kylar went to the store to buy glasses for his new apartment. One glass costs $5, but every second glass costs only 60% of the price. Kylar wants to buy 16 glasses. How much does he need to pay for them?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "64",
+      "category": "gsm8k",
+      "difficulty": "medium",
+      "notes": "GSM8K benchmark - alternating pricing"
+    },
+    {
+      "id": "mathbench_01",
+      "prompt": "Find the value of x if 3x + 7 = 22.",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "5",
+      "category": "mathbench",
+      "difficulty": "easy",
+      "notes": "MATH benchmark - basic algebra"
+    },
+    {
+      "id": "mathbench_02",
+      "prompt": "What is the sum of the first 100 positive integers?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "5050",
+      "category": "mathbench",
+      "difficulty": "medium",
+      "notes": "MATH benchmark - arithmetic series"
+    },
+    {
+      "id": "mathbench_03",
+      "prompt": "If f(x) = 2x^2 - 3x + 1, what is f(4)?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "21",
+      "category": "mathbench",
+      "difficulty": "easy",
+      "notes": "MATH benchmark - function evaluation"
+    },
+    {
+      "id": "mathbench_04",
+      "prompt": "A triangle has sides of length 5, 12, and 13. What is its area?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "30",
+      "category": "mathbench",
+      "difficulty": "medium",
+      "notes": "MATH benchmark - geometry (right triangle)"
+    },
+    {
+      "id": "mathbench_05",
+      "prompt": "How many ways can you arrange the letters in the word 'MATH'?",
+      "expected_lane": "AGENTIC",
+      "expected_answer": "24",
+      "category": "mathbench",
+      "difficulty": "medium",
+      "notes": "MATH benchmark - combinatorics"
+    }
+  ],
+  "holdout_ids": [
+    "gsm8k_04",
+    "gsm8k_05",
+    "mathbench_04",
+    "mathbench_05",
+    "logic_06",
+    "logic_07",
+    "reasoning_05",
+    "reasoning_07",
+    "edge_09",
+    "edge_10"
+  ]
+}
