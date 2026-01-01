@@ -68,6 +68,9 @@ class TernaryRouter:
         strong_provider: str | None = None,
         routellm_threshold: float = 0.12,
         use_routellm: bool = True,
+        use_trained_classifier: bool = True,
+        classifier_model_dir: str = "models/router_classifier",
+        classifier_confidence_threshold: float = 0.6,
     ):
         """Initialize the ternary router.
 
@@ -79,11 +82,27 @@ class TernaryRouter:
             strong_provider: Override provider for strong model (e.g., "groq").
             routellm_threshold: Threshold for RouteLLM MF router (default 0.12).
             use_routellm: Whether to use RouteLLM for weak vs strong routing.
+            use_trained_classifier: Whether to use trained embedding classifier.
+            classifier_model_dir: Directory containing trained classifier model.
+            classifier_confidence_threshold: Confidence threshold for classifier.
         """
         self.config = config or Config()
         self.routellm_threshold = routellm_threshold
         self.use_routellm = use_routellm and ROUTELLM_AVAILABLE
         self._routellm_router = None
+        self._trained_router = None
+
+        # Try to load trained classifier first
+        if use_trained_classifier:
+            try:
+                from pal_router.trained_router import TrainedRouter
+                self._trained_router = TrainedRouter(
+                    model_dir=classifier_model_dir,
+                    confidence_threshold=classifier_confidence_threshold,
+                )
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Failed to load trained classifier: {e}. Using heuristics.")
 
         # Initialize RouteLLM MF router if available and enabled
         if self.use_routellm:
@@ -142,9 +161,11 @@ class TernaryRouter:
     def route(self, prompt: str) -> RoutingDecision:
         """Determine which lane to route the query to.
 
-        The routing logic (per original plan):
-        1. AGENTIC: Queries with numeric content that benefit from code execution
-        2. RouteLLM MF router decides between REASONING and FAST
+        The routing logic:
+        1. If trained classifier is available and confident, use its prediction
+        2. Otherwise, fall back to heuristics:
+           a. AGENTIC: Queries with numeric content that benefit from code execution
+           b. RouteLLM MF router decides between REASONING and FAST
 
         Args:
             prompt: The user's query.
@@ -152,6 +173,15 @@ class TernaryRouter:
         Returns:
             RoutingDecision with lane, score, signals, and reason.
         """
+        # Try trained classifier first
+        if self._trained_router is not None:
+            return self._trained_router.route(prompt)
+
+        # Fall back to heuristics
+        return self._route_heuristic(prompt)
+
+    def _route_heuristic(self, prompt: str) -> RoutingDecision:
+        """Route using heuristic rules (fallback when classifier unavailable)."""
         score, signals = estimate_complexity(
             prompt,
             weights=self.config.complexity_weights,

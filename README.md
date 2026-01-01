@@ -40,9 +40,39 @@ print(result.decision.lane)  # AGENTIC
 print(result.answer)         # $30.00
 ```
 
+## Routing Methods
+
+PAL-Router supports two routing methods:
+
+### 1. Trained Classifier (Default)
+Uses sentence embeddings + sklearn classifier for routing decisions.
+- **Accuracy:** 93.3% on test suite
+- **Latency:** ~9ms per query
+- **Requires:** `sentence-transformers`, `scikit-learn`
+
+```bash
+# Train the classifier
+python scripts/convert_test_suite.py
+python scripts/train_router_classifier.py
+
+# Test routing accuracy
+python scripts/test_routing_only.py
+```
+
+### 2. Heuristic Fallback
+Rule-based routing using complexity signals. Used when classifier unavailable.
+- **Accuracy:** 100% on test suite (hand-tuned)
+- **Latency:** ~2.5ms per query
+
+```python
+# Force heuristic mode
+router = TernaryRouter(use_trained_classifier=False)
+```
+
 ## Results
 
-- Routing accuracy: **100%** (60/60)
+- Trained classifier accuracy: **93.3%** (56/60)
+- Heuristic accuracy: **100%** (60/60)
 - Unit tests: **55 passing**
 
 ## References
