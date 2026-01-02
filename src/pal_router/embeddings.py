@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Literal
 
 import numpy as np
@@ -14,17 +15,17 @@ MODELS = {
     "accurate": "instructor-base",    # 110M params, instruction-tuned
 }
 
-_model_cache: dict[str, SentenceTransformer] = {}
 
-
+@lru_cache(maxsize=3)  # Only 3 model types exist, cache all
 def get_embedder(
     model_name: Literal["fast", "balanced", "accurate"] = "fast"
 ) -> SentenceTransformer:
-    """Get or create a cached sentence transformer model."""
-    if model_name not in _model_cache:
-        model_id = MODELS[model_name]
-        _model_cache[model_name] = SentenceTransformer(model_id)
-    return _model_cache[model_name]
+    """Get or create a cached sentence transformer model.
+
+    Uses lru_cache with maxsize=3 (one per model type) to prevent unbounded memory growth.
+    """
+    model_id = MODELS[model_name]
+    return SentenceTransformer(model_id)
 
 
 def embed_query(query: str, model_name: str = "fast") -> np.ndarray:

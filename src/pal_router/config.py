@@ -1,7 +1,18 @@
 """Configuration for the Ternary LLM Router."""
 
+from __future__ import annotations
+
+import os
 from dataclasses import dataclass, field
 from typing import Literal
+
+# Environment variable for local llama.cpp server URL
+DEFAULT_LLAMACPP_URL = "http://localhost:8080/v1"
+
+
+def get_llamacpp_url() -> str:
+    """Get llama.cpp server URL from environment or default."""
+    return os.getenv("LLAMACPP_URL", DEFAULT_LLAMACPP_URL)
 
 
 @dataclass

@@ -1,5 +1,7 @@
 """Pre-configured router setups for common use cases."""
 
+from __future__ import annotations
+
 import os
 
 from pal_router.config import (
@@ -8,6 +10,7 @@ from pal_router.config import (
     GROQ_LLAMA_70B,
     GROQ_LLAMA_8B,
     LLAMACPP_QWEN,
+    get_llamacpp_url,
 )
 from pal_router.models import (
     FallbackClient,
@@ -21,9 +24,7 @@ from pal_router.router import TernaryRouter
 def create_fast_router(
     google_api_key: str | None = None,
     groq_api_key: str | None = None,
-    llamacpp_url: str = "http://10.3.0.163:8080/v1",
-    routellm_threshold: float = 0.12,
-    use_routellm: bool = True,
+    llamacpp_url: str | None = None,
 ) -> TernaryRouter:
     """Create a fast router with 3-way fallback chain.
 
@@ -33,17 +34,16 @@ def create_fast_router(
     Args:
         google_api_key: Google AI API key (or set GOOGLE_API_KEY env var)
         groq_api_key: Groq API key (or set GROQ_API_KEY env var)
-        llamacpp_url: Local llama.cpp server URL
-        routellm_threshold: Threshold for RouteLLM MF router (default 0.12)
-        use_routellm: Whether to use RouteLLM for weak vs strong routing
+        llamacpp_url: Local llama.cpp server URL (or set LLAMACPP_URL env var)
     """
     google_key = google_api_key or os.getenv("GOOGLE_API_KEY")
     groq_key = groq_api_key or os.getenv("GROQ_API_KEY")
+    llama_url = llamacpp_url or get_llamacpp_url()
 
     # 3-way fallback chain: Gemini → Groq → Local
     gemini = GeminiClient(GEMINI_PRO, api_key=google_key)
     groq_weak = GroqClient(GROQ_LLAMA_8B, api_key=groq_key)
-    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llamacpp_url)
+    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llama_url)
 
     weak = FallbackClient(gemini, groq_weak, local)
 
@@ -53,17 +53,13 @@ def create_fast_router(
     return TernaryRouter(
         weak_model=weak,
         strong_model=strong,
-        routellm_threshold=routellm_threshold,
-        use_routellm=use_routellm,
     )
 
 
 def create_quality_router(
     google_api_key: str | None = None,
     groq_api_key: str | None = None,
-    llamacpp_url: str = "http://10.3.0.163:8080/v1",
-    routellm_threshold: float = 0.12,
-    use_routellm: bool = True,
+    llamacpp_url: str | None = None,
 ) -> TernaryRouter:
     """Create a quality-focused router with best models.
 
@@ -73,16 +69,15 @@ def create_quality_router(
     Args:
         google_api_key: Google AI API key
         groq_api_key: Groq API key
-        llamacpp_url: Local llama.cpp server URL
-        routellm_threshold: Threshold for RouteLLM MF router (default 0.12)
-        use_routellm: Whether to use RouteLLM for weak vs strong routing
+        llamacpp_url: Local llama.cpp server URL (or set LLAMACPP_URL env var)
     """
     google_key = google_api_key or os.getenv("GOOGLE_API_KEY")
     groq_key = groq_api_key or os.getenv("GROQ_API_KEY")
+    llama_url = llamacpp_url or get_llamacpp_url()
 
     gemini = GeminiClient(GEMINI_PRO, api_key=google_key)
     groq_weak = GroqClient(GROQ_LLAMA_8B, api_key=groq_key)
-    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llamacpp_url)
+    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llama_url)
 
     weak = FallbackClient(gemini, groq_weak, local)
     strong = GroqClient(GROQ_LLAMA_70B, api_key=groq_key)
@@ -90,16 +85,12 @@ def create_quality_router(
     return TernaryRouter(
         weak_model=weak,
         strong_model=strong,
-        routellm_threshold=routellm_threshold,
-        use_routellm=use_routellm,
     )
 
 
 def create_groq_only_router(
     api_key: str | None = None,
-    llamacpp_url: str = "http://10.3.0.163:8080/v1",
-    routellm_threshold: float = 0.12,
-    use_routellm: bool = True,
+    llamacpp_url: str | None = None,
 ) -> TernaryRouter:
     """Create a Groq-only router with local fallback.
 
@@ -108,14 +99,13 @@ def create_groq_only_router(
 
     Args:
         api_key: Groq API key
-        llamacpp_url: Local llama.cpp server URL
-        routellm_threshold: Threshold for RouteLLM MF router (default 0.12)
-        use_routellm: Whether to use RouteLLM for weak vs strong routing
+        llamacpp_url: Local llama.cpp server URL (or set LLAMACPP_URL env var)
     """
     groq_key = api_key or os.getenv("GROQ_API_KEY")
+    llama_url = llamacpp_url or get_llamacpp_url()
 
     groq_weak = GroqClient(GROQ_LLAMA4_MAVERICK, api_key=groq_key)
-    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llamacpp_url)
+    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llama_url)
 
     weak = FallbackClient(groq_weak, local)
     strong = GroqClient(GROQ_LLAMA_70B, api_key=groq_key)
@@ -123,28 +113,23 @@ def create_groq_only_router(
     return TernaryRouter(
         weak_model=weak,
         strong_model=strong,
-        routellm_threshold=routellm_threshold,
-        use_routellm=use_routellm,
     )
 
 
 def create_local_only_router(
-    llamacpp_url: str = "http://10.3.0.163:8080/v1",
-    use_routellm: bool = False,
+    llamacpp_url: str | None = None,
 ) -> TernaryRouter:
     """Create a fully local router (no API keys needed, no rate limits).
 
     Uses local Qwen3-8B for both weak and strong.
-    RouteLLM disabled by default (same model for both lanes).
 
     Args:
-        llamacpp_url: Local llama.cpp server URL
-        use_routellm: Whether to use RouteLLM (default False for local)
+        llamacpp_url: Local llama.cpp server URL (or set LLAMACPP_URL env var)
     """
-    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llamacpp_url)
+    llama_url = llamacpp_url or get_llamacpp_url()
+    local = LlamaCppClient(LLAMACPP_QWEN, base_url=llama_url)
 
     return TernaryRouter(
         weak_model=local,
         strong_model=local,
-        use_routellm=use_routellm,
     )

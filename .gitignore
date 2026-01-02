@@ -1,5 +1,7 @@
 # Claude Code
 .claude/
+.kilocode
+.kilocodemodes
 
 # Python
 __pycache__/

@@ -103,8 +103,7 @@ class TrainedRouter:
         Returns:
             RoutingDecision with lane, confidence, and metadata.
         """
-        # Import here to avoid circular dependency
-        from pal_router.router import Lane, RoutingDecision
+        from pal_router.types import Lane, RoutingDecision
 
         # Get complexity signals for metadata
         score, signals = estimate_complexity(query)

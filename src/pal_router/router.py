@@ -3,35 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
 from pathlib import Path
 
 from pal_router.agentic import AgenticResult, AgenticWorkflow
-from pal_router.complexity import ComplexitySignals, estimate_complexity
 from pal_router.config import Config
 from pal_router.models import CompletionResult, ModelClient, get_client
-
-
-class Lane(str, Enum):
-    """The three routing lanes."""
-
-    FAST = "FAST"
-    REASONING = "REASONING"
-    AGENTIC = "AGENTIC"
-
-
-@dataclass
-class RoutingDecision:
-    """Complete routing decision with metadata."""
-
-    lane: Lane
-    complexity_score: float
-    signals: ComplexitySignals
-    reason: str
-    confidence: float = 1.0
-    probabilities: dict[str, float] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.now)
+from pal_router.types import Lane, RoutingDecision
 
 
 @dataclass

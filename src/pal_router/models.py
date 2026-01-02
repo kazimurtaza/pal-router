@@ -5,9 +5,56 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass
-from typing import Protocol
+from functools import wraps
+from typing import Callable, Protocol, TypeVar
 
 from pal_router.config import ModelConfig
+
+# Constants for retry logic
+MAX_RETRIES = 3
+INITIAL_BACKOFF_SECONDS = 1.0
+BACKOFF_MULTIPLIER = 2.0
+
+# Type variable for decorator
+T = TypeVar("T")
+
+
+def with_retry(
+    max_retries: int = MAX_RETRIES,
+    initial_backoff: float = INITIAL_BACKOFF_SECONDS,
+    backoff_multiplier: float = BACKOFF_MULTIPLIER,
+) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    """Decorator for retry logic with exponential backoff on rate limits.
+
+    Args:
+        max_retries: Maximum number of retry attempts.
+        initial_backoff: Initial wait time in seconds.
+        backoff_multiplier: Multiplier for exponential backoff.
+
+    Returns:
+        Decorated function with retry logic.
+    """
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> T:
+            last_error = None
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_error = e
+                    error_str = str(e).lower()
+                    # Retry on rate limit or transient errors
+                    if "429" in str(e) or "rate" in error_str or "overloaded" in error_str:
+                        if attempt < max_retries - 1:
+                            wait_time = initial_backoff * (backoff_multiplier ** attempt)
+                            time.sleep(wait_time)
+                            continue
+                    # Re-raise non-retryable errors
+                    raise
+            raise last_error or RuntimeError("All retries exhausted")
+        return wrapper
+    return decorator
 
 
 @dataclass
@@ -54,6 +101,7 @@ class OpenAIClient:
     def model_name(self) -> str:
         return self.config.name
 
+    @with_retry()
     def complete(self, prompt: str, system: str | None = None) -> CompletionResult:
         """Generate a completion using OpenAI.
 
@@ -114,6 +162,7 @@ class AnthropicClient:
     def model_name(self) -> str:
         return self.config.name
 
+    @with_retry()
     def complete(self, prompt: str, system: str | None = None) -> CompletionResult:
         """Generate a completion using Anthropic.
 
@@ -162,19 +211,22 @@ class LlamaCppClient:
     def __init__(
         self,
         config: ModelConfig,
-        base_url: str = "http://10.3.0.163:8080/v1",
+        base_url: str | None = None,
     ):
         """Initialize the llama.cpp client.
 
         Args:
             config: Model configuration.
-            base_url: URL of the llama.cpp server.
+            base_url: URL of the llama.cpp server. If None, uses LLAMACPP_URL env var
+                      or defaults to http://localhost:8080/v1
         """
         from openai import OpenAI
 
+        from pal_router.config import get_llamacpp_url
+
         self.config = config
         self._client = OpenAI(
-            base_url=base_url,
+            base_url=base_url or get_llamacpp_url(),
             api_key="not-needed",
             timeout=120.0,  # Local models can be slow
         )
@@ -233,6 +285,7 @@ class GroqClient:
     def model_name(self) -> str:
         return self.config.name
 
+    @with_retry()
     def complete(self, prompt: str, system: str | None = None) -> CompletionResult:
         """Generate a completion using Groq."""
         messages = []
@@ -267,7 +320,7 @@ class GroqClient:
 
 
 class GeminiClient:
-    """Google Gemini client with rate limit handling."""
+    """Google Gemini client."""
 
     def __init__(self, config: ModelConfig, api_key: str | None = None):
         """Initialize the Gemini client.
@@ -287,6 +340,7 @@ class GeminiClient:
     def model_name(self) -> str:
         return self.config.name
 
+    @with_retry()
     def complete(self, prompt: str, system: str | None = None) -> CompletionResult:
         """Generate a completion using Gemini."""
         full_prompt = prompt
@@ -294,20 +348,7 @@ class GeminiClient:
             full_prompt = f"{system}\n\n{prompt}"
 
         start = time.perf_counter()
-
-        # Retry with backoff for rate limits
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                response = self._model.generate_content(full_prompt)
-                break
-            except Exception as e:
-                if "429" in str(e) and attempt < max_retries - 1:
-                    import time as t
-                    t.sleep(2 ** attempt)  # Exponential backoff
-                    continue
-                raise
-
+        response = self._model.generate_content(full_prompt)
         latency_ms = (time.perf_counter() - start) * 1000
 
         # Gemini doesn't always provide token counts
@@ -389,7 +430,7 @@ def get_client(
     Args:
         config: Model configuration.
         provider: One of "openai", "anthropic", "llamacpp", "groq", "gemini".
-        base_url: Optional base URL for llamacpp.
+        base_url: Optional base URL for llamacpp. If None, uses LLAMACPP_URL env var.
         api_key: Optional API key override.
 
     Returns:
@@ -398,7 +439,7 @@ def get_client(
     if provider == "anthropic":
         return AnthropicClient(config, api_key)
     elif provider == "llamacpp":
-        return LlamaCppClient(config, base_url or "http://10.3.0.163:8080/v1")
+        return LlamaCppClient(config, base_url)  # Uses env var if None
     elif provider == "groq":
         return GroqClient(config, api_key)
     elif provider == "gemini":
