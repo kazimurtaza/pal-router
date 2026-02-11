@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from typing import Literal
 
 
 @dataclass
@@ -11,7 +11,7 @@ class ToolCall:
     """Single tool invocation request from orchestrator."""
     name: str  # "fast_model", "code_executor", etc.
     parameters: dict  # {"query": "..."} or {"problem": "...", "model": "..."}
-    reasoning: Optional[str] = None  # Why this tool (if provided)
+    reasoning: str | None = None  # Why this tool (if provided)
 
 
 @dataclass
@@ -19,7 +19,7 @@ class ToolResult:
     """Result from executing a tool."""
     success: bool
     output: str
-    error: Optional[str] = None
+    error: str | None = None
     metadata: dict = field(default_factory=dict)  # cost, latency, sources, etc.
 
 
@@ -38,7 +38,7 @@ class OrchestratorConfig:
     # Model settings
     model_path: str = "nvidia/Nemotron-Orchestrator-8B"
     backend: Literal["llamacpp", "vllm", "transformers"] = "llamacpp"
-    model_url: Optional[str] = None  # For llama.cpp server
+    model_url: str | None = None  # For llama.cpp server
 
     # Budget limits
     max_rounds: int = 5
@@ -72,6 +72,7 @@ class ConversationContext:
     original_query: str
     turns: list[ConversationTurn] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    has_retried_no_tool: bool = False
 
     @property
     def total_cost(self) -> float:
@@ -119,24 +120,34 @@ class ConversationContext:
             parts.append("## Already Tried\n" + "\n".join(f"- {t}" for t in tried))
 
         # Results by type
-        code_results = [t for t in self.turns if t.tool_call.name == "code_executor" and t.result.success]
+        code_results = [
+            t for t in self.turns
+            if t.tool_call.name == "code_executor" and t.result.success
+        ]
         if code_results:
             outputs = "\n".join(f"```\n{t.result.output}\n```" for t in code_results[-2:])
             parts.append("## Code Results\n" + outputs)
 
-        search_results = [t for t in self.turns if t.tool_call.name == "web_search" and t.result.success]
+        search_results = [
+            t for t in self.turns
+            if t.tool_call.name == "web_search" and t.result.success
+        ]
         if search_results:
             outputs = "\n".join(f"- {t.result.output[:200]}" for t in search_results[-2:])
             parts.append("## Search Results\n" + outputs)
 
-        model_results = [t for t in self.turns if t.tool_call.name in ("fast_model", "strong_model") and t.result.success]
+        model_results = [
+            t for t in self.turns
+            if t.tool_call.name in ("fast_model", "strong_model") and t.result.success
+        ]
         if model_results:
             outputs = "\n".join(f"- {t.result.output[:300]}" for t in model_results[-2:])
             parts.append("## Model Responses\n" + outputs)
 
         # Errors
         if self.errors:
-            parts.append("## Errors (avoid these)\n" + "\n".join(f"- {e}" for e in self.errors[-2:]))
+            error_list = "\n".join(f"- {e}" for e in self.errors[-2:])
+            parts.append("## Errors (avoid these)\n" + error_list)
 
         return "\n\n".join(parts)
 
@@ -147,6 +158,6 @@ class OrchestratorDecision:
     reasoning: str  # Free-form thinking before tool calls
     tool_calls: list[ToolCall]  # Tools to execute (usually 1)
     is_final: bool  # Is final_answer included?
-    final_answer: Optional[str] = None  # Answer if is_final=True
-    sources: Optional[list[str]] = None  # Sources if final_answer
-    raw_response: Optional[str] = None  # Raw LLM output for debugging
+    final_answer: str | None = None  # Answer if is_final=True
+    sources: list[str] | None = None  # Sources if final_answer
+    raw_response: str | None = None  # Raw LLM output for debugging

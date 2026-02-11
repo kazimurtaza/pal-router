@@ -2,16 +2,18 @@
 
 import sys
 from pathlib import Path
+from unittest.mock import Mock, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from unittest.mock import Mock, MagicMock, patch
-from pal_router.orchestrator import OrchestratorRouter, ORCHESTRATOR_PROMPT
 from pal_router.conversation import (
-    OrchestratorConfig,
     ConversationContext,
-    OrchestratorDecision,
+    ConversationTurn,
+    OrchestratorConfig,
     ToolCall,
+    ToolResult,
 )
+from pal_router.orchestrator import ORCHESTRATOR_PROMPT, OrchestratorRouter
 from pal_router.router import RouterResult
 
 
@@ -42,8 +44,6 @@ def test_orchestrator_prompt_includes_all_sections():
 
 def test_build_orchestrator_prompt():
     """Should build prompt with original query and context."""
-    from pal_router.orchestrator import OrchestratorRouter
-
     config = OrchestratorConfig()
     mock_infra = Mock()
 
@@ -59,8 +59,6 @@ def test_build_orchestrator_prompt():
 
 def test_synthesize_from_context():
     """Should create decision from accumulated context."""
-    from pal_router.orchestrator import OrchestratorRouter
-
     config = OrchestratorConfig()
     mock_infra = Mock()
 
@@ -69,7 +67,6 @@ def test_synthesize_from_context():
 
         context = ConversationContext(original_query="Test query")
         # Add a turn with result
-        from pal_router.conversation import ToolCall, ToolResult, ConversationTurn
         turn = ConversationTurn(
             tool_call=ToolCall(name="fast_model", parameters={"query": "test"}),
             result=ToolResult(success=True, output="Test answer"),
@@ -86,8 +83,6 @@ def test_synthesize_from_context():
 
 def test_force_final_answer_when_stuck():
     """Should force final answer when stuck in loop."""
-    from pal_router.orchestrator import OrchestratorRouter
-
     config = OrchestratorConfig()
     mock_infra = Mock()
 
@@ -96,7 +91,6 @@ def test_force_final_answer_when_stuck():
 
         context = ConversationContext(original_query="Test")
         # Create stuck condition - 3 same tool calls
-        from pal_router.conversation import ToolCall, ToolResult, ConversationTurn
         for _ in range(3):
             turn = ConversationTurn(
                 tool_call=ToolCall(name="fast_model", parameters={"query": "test"}),
@@ -111,7 +105,8 @@ def test_force_final_answer_when_stuck():
         decision = router._force_final_answer(context)
 
         assert decision.is_final is True
-        assert "unable to complete" in decision.final_answer.lower() or "answer" in decision.final_answer.lower()
+        final_lower = decision.final_answer.lower()
+        assert "unable to complete" in final_lower or "answer" in final_lower
 
 
 @patch('pal_router.orchestrator.OpenAI')

@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import os
 import time
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from openai import OpenAI
-from transformers import AutoTokenizer
 
 from pal_router.conversation import (
     ConversationContext,
@@ -17,10 +14,14 @@ from pal_router.conversation import (
     OrchestratorConfig,
     OrchestratorDecision,
     ToolCall,
+    ToolResult,
 )
 from pal_router.router import RouterResult, RoutingDecision
-from pal_router.tools import ToolRegistry, DEFAULT_TOOLS, parse_orchestrator_response
+from pal_router.tools import ToolRegistry, parse_orchestrator_response
 from pal_router.types import Lane
+
+if TYPE_CHECKING:
+    pass
 
 
 # Orchestrator prompt template
@@ -70,7 +71,6 @@ class OrchestratorRouter:
 
         # Load orchestrator model
         self._orchestrator = self._load_orchestrator()
-        self._tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
 
     def _load_orchestrator(self):
         """Load the orchestrator model based on backend."""
@@ -121,7 +121,7 @@ class OrchestratorRouter:
             # Handle no tool calls
             if not decision.tool_calls and not decision.is_final:
                 context.errors.append("No tool selected")
-                if hasattr(context, 'has_retried_no_tool') and context.has_retried_no_tool:
+                if context.has_retried_no_tool:
                     decision = self._fallback_to_strong_model(query)
                     break
                 context.has_retried_no_tool = True
@@ -146,7 +146,7 @@ class OrchestratorRouter:
                     context.errors.append(error_msg)
                     context.turns.append(ConversationTurn(
                         tool_call=tool_call,
-                        result=Mock(success=False, output="", error=str(e)),
+                        result=ToolResult(success=False, output="", error=str(e)),
                         cost_usd=0,
                         latency_ms=0
                     ))
@@ -229,7 +229,10 @@ class OrchestratorRouter:
         if outputs:
             answer = "\n\n".join(outputs[-2:])  # Last 2 outputs
         else:
-            answer = "Unable to complete the task. The orchestrator encountered errors or exceeded budget limits."
+            answer = (
+                "Unable to complete the task. The orchestrator encountered "
+                "errors or exceeded budget limits."
+            )
 
         return OrchestratorDecision(
             reasoning="Synthesized from accumulated context",
@@ -263,7 +266,10 @@ class OrchestratorRouter:
             reasoning="No successful results available",
             tool_calls=[],
             is_final=True,
-            final_answer="I was unable to complete this task after multiple attempts. The task may require additional information or capabilities.",
+            final_answer=(
+                "I was unable to complete this task after multiple attempts. "
+                "The task may require additional information or capabilities."
+            ),
             sources=[]
         )
 
@@ -312,7 +318,11 @@ Error: {type(error).__name__}: {str(error)[:200]}
 
 Consider: Try different parameters, use a different tool, or use strong_model as fallback."""
 
-    def _build_routing_decision(self, context: ConversationContext, orchestrator_decision: OrchestratorDecision) -> RoutingDecision:
+    def _build_routing_decision(
+        self,
+        context: ConversationContext,
+        orchestrator_decision: OrchestratorDecision,
+    ) -> RoutingDecision:
         """Build RoutingDecision for compatibility with existing API.
 
         Args:
@@ -340,7 +350,11 @@ Consider: Try different parameters, use a different tool, or use strong_model as
             lane=lane,
             complexity_score=0.5,  # Could compute from context
             signals=None,  # Could extract from context
-            reason=orchestrator_decision.reasoning if orchestrator_decision else "Orchestrator routing",
+            reason=(
+                orchestrator_decision.reasoning
+                if orchestrator_decision
+                else "Orchestrator routing"
+            ),
             confidence=0.8,  # Could compute from tool success rates
         )
 
