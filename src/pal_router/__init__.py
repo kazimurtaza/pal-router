@@ -6,7 +6,13 @@ from pal_router.config import Config
 from pal_router.conversation import ConversationContext, ConversationTurn, OrchestratorDecision, ToolCall, ToolResult
 from pal_router.models import CompletionResult, ModelClient, get_client, FallbackClient
 from pal_router.orchestrator import OrchestratorConfig, OrchestratorRouter
-from pal_router.presets import create_fast_router, create_quality_router, create_groq_only_router, create_local_only_router
+from pal_router.presets import (
+    create_fast_router,
+    create_groq_only_router,
+    create_local_only_router,
+    create_orchestrator_router,
+    create_quality_router,
+)
 from pal_router.router import RouterResult, TernaryRouter
 from pal_router.tools import DEFAULT_TOOLS, ToolRegistry
 from pal_router.types import Lane, RoutingDecision
@@ -35,6 +41,7 @@ __all__ = [
     "create_fast_router",
     "create_groq_only_router",
     "create_local_only_router",
+    "create_orchestrator_router",
     "create_quality_router",
     "estimate_complexity",
     "get_client",

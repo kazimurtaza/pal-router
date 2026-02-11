@@ -18,6 +18,7 @@ from pal_router.models import (
     GroqClient,
     LlamaCppClient,
 )
+from pal_router.orchestrator import OrchestratorRouter
 from pal_router.router import TernaryRouter
 
 
@@ -133,3 +134,40 @@ def create_local_only_router(
         weak_model=local,
         strong_model=local,
     )
+
+
+def create_orchestrator_router(
+    model_url: str | None = None,
+    existing_infra = None,
+) -> OrchestratorRouter:
+    """Create an orchestrator-based router using Nemotron-Orchestrator-8B.
+
+    The orchestrator router uses an LLM to intelligently route queries
+    and orchestrate tool calls for complex multi-step tasks.
+
+    Args:
+        model_url: URL for the orchestrator model (llama.cpp server).
+                   Defaults to LLAMACPP_URL env var or http://localhost:8080/v1
+        existing_infra: PAL-Router infrastructure (ModelClient, AgenticWorkflow, etc.)
+
+    Returns:
+        Configured OrchestratorRouter instance
+    """
+    from pal_router.conversation import OrchestratorConfig
+
+    url = model_url or get_llamacpp_url()
+    config = OrchestratorConfig(model_url=url)
+
+    return OrchestratorRouter(
+        config=config,
+        existing_infra=existing_infra,
+    )
+
+
+__all__ = [
+    "create_fast_router",
+    "create_groq_only_router",
+    "create_local_only_router",
+    "create_orchestrator_router",
+    "create_quality_router",
+]
