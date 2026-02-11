@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from pal_router.tools import (
     ToolRegistry,
     DEFAULT_TOOLS,
@@ -57,8 +57,6 @@ def test_tool_registry_init():
 
 def test_execute_fast_model():
     """Should execute fast_model using infrastructure."""
-    from pal_router.tools import ToolRegistry
-
     config = OrchestratorConfig()
     mock_infra = Mock()
     mock_client = Mock()
@@ -80,8 +78,6 @@ def test_execute_fast_model():
 
 def test_execute_code_executor():
     """Should execute code using AgenticWorkflow."""
-    from pal_router.tools import ToolRegistry
-
     config = OrchestratorConfig()
     mock_infra = Mock()
     mock_client = Mock()
@@ -113,8 +109,6 @@ def test_execute_code_executor():
 
 def test_execute_final_answer():
     """Final answer should just return the answer."""
-    from pal_router.tools import ToolRegistry
-
     config = OrchestratorConfig()
     mock_infra = Mock()
     registry = ToolRegistry(config, mock_infra)
@@ -133,8 +127,6 @@ def test_execute_final_answer():
 
 def test_execute_unknown_tool_raises_error():
     """Unknown tools should raise ValueError."""
-    from pal_router.tools import ToolRegistry
-
     config = OrchestratorConfig()
     mock_infra = Mock()
     registry = ToolRegistry(config, mock_infra)
