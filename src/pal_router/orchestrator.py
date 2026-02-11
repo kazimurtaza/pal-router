@@ -1,26 +1,15 @@
-"""LLM-based orchestrator router for PAL-Router.
-
-This module implements the main OrchestratorRouter class that uses an 8B LLM
-to coordinate multiple tools (fast_model, strong_model, code_executor, web_search)
-inspired by NVIDIA's ToolOrchestra paper.
-"""
+"""Orchestrator-based router using Nemotron-Orchestrator-8B."""
 
 from __future__ import annotations
 
-import json
+import os
 import time
-from typing import Any, Literal, Optional
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
-try:
-    import requests
-except ImportError:
-    requests = None  # type: ignore
-
-try:
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-except ImportError:
-    AutoModelForCausalLM = None  # type: ignore
-    AutoTokenizer = None  # type: ignore
+from openai import OpenAI
+from transformers import AutoTokenizer
 
 from pal_router.conversation import (
     ConversationContext,
@@ -28,121 +17,167 @@ from pal_router.conversation import (
     OrchestratorConfig,
     OrchestratorDecision,
     ToolCall,
-    ToolResult,
 )
-from pal_router.tools import ToolRegistry, parse_orchestrator_response
+from pal_router.router import RouterResult, RoutingDecision
+from pal_router.tools import ToolRegistry, DEFAULT_TOOLS, parse_orchestrator_response
+from pal_router.types import Lane
+
+
+# Orchestrator prompt template
+ORCHESTRATOR_PROMPT = """You are an orchestrator that solves tasks by calling tools.
+
+## Original Question
+{original_query}
+
+## Available Tools
+- fast_model: Simple facts, definitions. Fast & cheap.
+- strong_model: Complex reasoning, analysis. Slower & expensive.
+- code_executor: Math, computation. Runs Python.
+- web_search: Current information, facts to verify.
+- final_answer: Deliver your answer (REQUIRED to complete).
+
+{context_string}
+
+## Instructions
+1. Analyze what's still needed to answer the question
+2. Choose ONE tool that makes progress
+3. Do NOT repeat failed approaches
+4. When you have enough information, use final_answer
+
+What tool do you want to use?"""
 
 
 class OrchestratorRouter:
-    """LLM-based orchestrator router.
+    """Main router using Nemotron-Orchestrator-8B.
 
-    This router uses an 8B LLM to intelligently route queries to appropriate
-    tools based on the query characteristics and accumulated context.
-
-    Attributes:
-        config: Orchestrator configuration
-        infra: PAL-Router's existing infrastructure
-        tool_registry: Tool registry and executor
+    Replaces the embedding+MLP classifier with an LLM-based orchestrator.
     """
 
-    def __init__(self, config: OrchestratorConfig, infrastructure: Any):
+    def __init__(
+        self,
+        config: OrchestratorConfig | None = None,
+        existing_infra = None,  # PAL-Router's existing infrastructure
+    ):
         """Initialize the orchestrator router.
 
         Args:
             config: Orchestrator configuration
-            infrastructure: PAL-Router's existing infrastructure
+            existing_infra: PAL-Router infrastructure (ModelClient, AgenticWorkflow, etc.)
         """
-        self.config = config
-        self.infra = infrastructure
-        self.tool_registry = ToolRegistry(config, infrastructure)
+        self.config = config or OrchestratorConfig()
+        self.infra = existing_infra or _ExistingInfrastructure()
+        self.tool_registry = ToolRegistry(self.config, self.infra)
 
-        # Lazy loaded model for transformers backend
-        self._model = None
-        self._tokenizer = None
+        # Load orchestrator model
+        self._orchestrator = self._load_orchestrator()
+        self._tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
 
-    def query(self, user_query: str) -> ConversationContext:
-        """Process a user query through orchestration.
+    def _load_orchestrator(self):
+        """Load the orchestrator model based on backend."""
+        if self.config.backend == "llamacpp":
+            url = self.config.model_url or os.getenv("LLAMACPP_URL", "http://localhost:8080/v1")
+            return OpenAI(base_url=url, api_key="not-needed")
+        else:
+            raise NotImplementedError(f"Backend {self.config.backend} not yet implemented")
+
+    def route_and_execute(self, query: str) -> RouterResult:
+        """Main entry point - route and execute a query.
+
+        Replaces old TernaryRouter.execute()
 
         Args:
-            user_query: The user's query string
+            query: The user's query
 
         Returns:
-            ConversationContext with all turns and final answer
+            RouterResult with decision, answer, cost, and latency
         """
-        # Create new context
-        context = ConversationContext(original_query=user_query)
+        context = ConversationContext(original_query=query)
+        start_time = time.perf_counter()
 
-        # Run orchestration loop
-        self._run_orchestration_loop(context)
+        decision = None
 
-        return context
+        for round_num in range(self.config.max_rounds):
+            # Check budgets
+            if context.budget_exceeded(self.config):
+                decision = self._synthesize_from_context(context)
+                break
 
-    def _run_orchestration_loop(self, context: ConversationContext) -> None:
-        """Run the main orchestration loop.
+            if context.is_stuck():
+                decision = self._force_final_answer(context)
+                break
 
-        Loop:
-        1. Check if we should stop (budget, stuck, max rounds)
-        2. Orchestrate next round (query LLM, parse response)
-        3. Execute tool(s) and record results
-        4. Repeat until stop condition met
+            # Get orchestrator decision
+            try:
+                decision = self._get_orchestrator_decision(context)
+            except Exception as e:
+                context.errors.append(f"Orchestrator error: {e}")
+                if len(context.turns) == 0:
+                    # First round failed - fallback immediately
+                    decision = self._fallback_to_strong_model(query)
+                    break
+                # Otherwise try to continue
+                continue
 
-        Args:
-            context: Current conversation context (modified in-place)
-        """
-        while not self._should_stop(context):
-            # Get next decision from orchestrator
-            decision = self._orchestrate_round(context)
+            # Handle no tool calls
+            if not decision.tool_calls and not decision.is_final:
+                context.errors.append("No tool selected")
+                if hasattr(context, 'has_retried_no_tool') and context.has_retried_no_tool:
+                    decision = self._fallback_to_strong_model(query)
+                    break
+                context.has_retried_no_tool = True
+                continue
 
-            # Check if final answer provided
-            if decision.is_final and decision.final_answer:
-                self._record_final_answer(context, decision)
+            # Check if done
+            if decision.is_final:
                 break
 
             # Execute tool calls
             for tool_call in decision.tool_calls:
-                turn = self._execute_tool(tool_call)
-                context.turns.append(turn)
+                try:
+                    result = self.tool_registry.execute(tool_call)
+                    context.turns.append(ConversationTurn(
+                        tool_call=tool_call,
+                        result=result,
+                        cost_usd=result.metadata.get("cost_usd", 0),
+                        latency_ms=result.metadata.get("latency_ms", 0)
+                    ))
+                except Exception as e:
+                    error_msg = self._format_error_for_context(tool_call, e)
+                    context.errors.append(error_msg)
+                    context.turns.append(ConversationTurn(
+                        tool_call=tool_call,
+                        result=Mock(success=False, output="", error=str(e)),
+                        cost_usd=0,
+                        latency_ms=0
+                    ))
 
-                # Record error if tool failed
-                if not turn.result.success:
-                    context.errors.append(
-                        f"{tool_call.name} failed: {turn.result.error}"
-                    )
+            # Check if should continue
+            if len(context.turns) >= self.config.max_rounds:
+                decision = self._synthesize_from_context(context)
+                break
 
-        # If loop exited without final answer, provide fallback
-        if not any(t.tool_call.name == "final_answer" for t in context.turns):
-            self._provide_fallback_answer(context)
+        # Build result
+        total_latency = (time.perf_counter() - start_time) * 1000
+        total_cost = context.total_cost
 
-    def _should_stop(self, context: ConversationContext) -> bool:
-        """Check if orchestration should stop.
+        # Extract final answer
+        if decision and decision.is_final:
+            final_answer = decision.final_answer or ""
+        elif decision and decision.tool_calls:
+            final_answer = decision.tool_calls[0].parameters.get("answer", "")
+        else:
+            final_answer = "Unable to generate answer"
 
-        Stop conditions:
-        - Max rounds reached
-        - Budget exceeded
-        - Stuck in loop
+        return RouterResult(
+            decision=self._build_routing_decision(context, decision),
+            answer=final_answer,
+            total_cost_usd=total_cost,
+            total_latency_ms=total_latency,
+            completions=[],  # Could populate from context.turns
+        )
 
-        Args:
-            context: Current conversation context
-
-        Returns:
-            True if should stop, False otherwise
-        """
-        # Max rounds check
-        if len(context.turns) >= self.config.max_rounds:
-            return True
-
-        # Budget check
-        if context.budget_exceeded(self.config):
-            return True
-
-        # Stuck detection
-        if context.is_stuck():
-            return True
-
-        return False
-
-    def _orchestrate_round(self, context: ConversationContext) -> OrchestratorDecision:
-        """Orchestrate a single round.
+    def _get_orchestrator_decision(self, context: ConversationContext) -> OrchestratorDecision:
+        """Get decision from orchestrator model.
 
         Args:
             context: Current conversation context
@@ -150,391 +185,185 @@ class OrchestratorRouter:
         Returns:
             OrchestratorDecision with tool calls and reasoning
         """
-        # Build messages
-        system_prompt = self._build_system_prompt()
-        user_context = context.build_prompt_context(self.config)
+        prompt = self._build_orchestrator_prompt(context)
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_context},
-        ]
-
-        # Query orchestrator model
-        response = self._query_orchestrator_model(messages)
-
-        # Parse response
-        return self._parse_orchestrator_response(response)
-
-    def _build_system_prompt(self) -> str:
-        """Build system prompt with tool definitions.
-
-        Returns:
-            System prompt string
-        """
-        tools_info = []
-        for tool in self.config.tools:
-            func = tool["function"]
-            name = func["name"]
-            desc = func["description"]
-            tools_info.append(f"- {name}: {desc}")
-
-        prompt = f"""You are an intelligent orchestrator that routes queries to appropriate tools.
-
-Available tools:
-{chr(10).join(tools_info)}
-
-Your job:
-1. Analyze the user's query and accumulated context
-2. Decide which tool to use next (or provide final_answer)
-3. Consider budget constraints and avoid repeating failed approaches
-4. Always use final_answer to deliver results to the user
-
-Budget tracking:
-- Max rounds: {self.config.max_rounds}
-- Max cost: ${self.config.max_cost_usd:.4f}
-- Max latency: {self.config.max_latency_ms}ms
-
-Respond with:
-- Reasoning about your decision
-- Tool call(s) to execute (with parameters)
-- final_answer when task is complete
-"""
-        return prompt
-
-    def _query_orchestrator_model(self, messages: list[dict]) -> Any:
-        """Query the orchestrator model via configured backend.
-
-        Args:
-            messages: List of message dicts with role and content
-
-        Returns:
-            Model response (backend-specific format)
-        """
-        backend = self.config.backend
-
-        if backend == "llamacpp":
-            return self._query_llamacpp(messages)
-        elif backend == "vllm":
-            return self._query_vllm(messages)
-        elif backend == "transformers":
-            return self._query_transformers(messages)
-        else:
-            raise ValueError(f"Unknown backend: {backend}")
-
-    def _query_llamacpp(self, messages: list[dict]) -> Any:
-        """Query llama.cpp server.
-
-        Args:
-            messages: List of message dicts
-
-        Returns:
-            Mock response object compatible with parse_orchestrator_response
-        """
-        if requests is None:
-            raise ImportError("requests library required for llamacpp backend")
-
-        url = self.config.model_url or "http://localhost:8080/v1/chat/completions"
-
-        payload = {
-            "model": self.config.model_path,
-            "messages": messages,
-            "tools": self.config.tools,
-            "tool_choice": "auto",
-            "temperature": 0.7,
-            "max_tokens": 512,
-        }
-
-        response = requests.post(url, json=payload, timeout=30)
-        response.raise_for_status()
-
-        # Return mock object compatible with parse_orchestrator_response
-        class LlamaResponse:
-            def __init__(self, data: dict):
-                self.data = data
-                self.choices = [self._make_choice(data)]
-
-            def _make_choice(self, data: dict):
-                class Choice:
-                    def __init__(self, msg: dict):
-                        self.message = self._make_message(msg)
-
-                    def _make_message(self, msg: dict):
-                        class Message:
-                            def __init__(self, msg: dict):
-                                self.content = msg.get("content")
-                                self.tool_calls = [
-                                    self._make_tc(tc)
-                                    for tc in msg.get("tool_calls", [])
-                                ]
-
-                            def _make_tc(self, tc: dict):
-                                class ToolCall:
-                                    def __init__(self, tc: dict):
-                                        self.function = self._make_function(tc)
-
-                                    def _make_function(self, tc: dict):
-                                        class Function:
-                                            def __init__(self, f: dict):
-                                                self.name = f.get("name")
-                                                self.arguments = f.get("arguments", "{}")
-
-                                        return Function(tc.get("function", {}))
-
-                                return ToolCall(tc)
-
-                        return Message(msg)
-
-                return Choice(data["choices"][0])
-
-        return LlamaResponse(response.json())
-
-    def _query_vllm(self, messages: list[dict]) -> Any:
-        """Query vLLM server.
-
-        Args:
-            messages: List of message dicts
-
-        Returns:
-            Mock response object compatible with parse_orchestrator_response
-        """
-        if requests is None:
-            raise ImportError("requests library required for vllm backend")
-
-        url = self.config.model_url or "http://localhost:8000/v1/chat/completions"
-
-        payload = {
-            "model": self.config.model_path,
-            "messages": messages,
-            "tools": self.config.tools,
-            "tool_choice": "auto",
-            "temperature": 0.7,
-            "max_tokens": 512,
-        }
-
-        response = requests.post(url, json=payload, timeout=30)
-        response.raise_for_status()
-
-        # Use same response format as llamacpp
-        class VLLMResponse:
-            def __init__(self, data: dict):
-                self.data = data
-                self.choices = [self._make_choice(data)]
-
-            def _make_choice(self, data: dict):
-                class Choice:
-                    def __init__(self, msg: dict):
-                        self.message = self._make_message(msg)
-
-                    def _make_message(self, msg: dict):
-                        class Message:
-                            def __init__(self, msg: dict):
-                                self.content = msg.get("content")
-                                self.tool_calls = [
-                                    self._make_tc(tc)
-                                    for tc in msg.get("tool_calls", [])
-                                ]
-
-                            def _make_tc(self, tc: dict):
-                                class ToolCall:
-                                    def __init__(self, tc: dict):
-                                        self.function = self._make_function(tc)
-
-                                    def _make_function(self, tc: dict):
-                                        class Function:
-                                            def __init__(self, f: dict):
-                                                self.name = f.get("name")
-                                                self.arguments = f.get("arguments", "{}")
-
-                                        return Function(tc.get("function", {}))
-
-                                return ToolCall(tc)
-
-                        return Message(msg)
-
-                return Choice(data["choices"][0])
-
-        return VLLMResponse(response.json())
-
-    def _query_transformers(self, messages: list[dict]) -> Any:
-        """Query local model via transformers.
-
-        Args:
-            messages: List of message dicts
-
-        Returns:
-            Mock response object compatible with parse_orchestrator_response
-        """
-        if AutoModelForCausalLM is None or AutoTokenizer is None:
-            raise ImportError("transformers library required for transformers backend")
-
-        # Lazy load model
-        if self._model is None:
-            self._tokenizer = AutoTokenizer.from_pretrained(self.config.model_path)
-            self._model = AutoModelForCausalLM.from_pretrained(self.config.model_path)
-
-        # Build prompt
-        prompt = self._messages_to_prompt(messages)
-
-        # Generate
-        inputs = self._tokenizer(prompt, return_tensors="pt")
-        outputs = self._model.generate(
-            **inputs,
-            max_new_tokens=512,
-            temperature=0.7,
-            do_sample=True,
+        response = self._orchestrator.chat.completions.create(
+            model=self.config.model_path,
+            messages=[{"role": "user", "content": prompt}],
+            tools=self.config.tools,
+            temperature=1.0,  # NVIDIA uses temp=1 for orchestrator
         )
 
-        response_text = self._tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-        # Return mock response
-        class TransformersResponse:
-            def __init__(self, text: str):
-                self.text = text
-                self.choices = [self._make_choice(text)]
-
-            def _make_choice(self, text: str):
-                class Choice:
-                    def __init__(self, text: str):
-                        self.message = self._make_message(text)
-
-                    def _make_message(self, text: str):
-                        class Message:
-                            def __init__(self, text: str):
-                                self.content = text
-                                self.tool_calls = None
-
-                        return Message(text)
-
-                return Choice(text)
-
-        return TransformersResponse(response_text)
-
-    def _messages_to_prompt(self, messages: list[dict]) -> str:
-        """Convert messages list to prompt string for transformers.
-
-        Args:
-            messages: List of message dicts
-
-        Returns:
-            Prompt string
-        """
-        parts = []
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            parts.append(f"{role}: {content}")
-        return "\n".join(parts) + "\nassistant:"
-
-    def _parse_orchestrator_response(self, response: Any) -> OrchestratorDecision:
-        """Parse orchestrator response into OrchestratorDecision.
-
-        Args:
-            response: Raw response from LLM backend
-
-        Returns:
-            Parsed OrchestratorDecision
-        """
         return parse_orchestrator_response(response, self.config.tools)
 
-    def _execute_tool(self, tool_call: ToolCall) -> ConversationTurn:
-        """Execute a tool call and record the result.
+    def _build_orchestrator_prompt(self, context: ConversationContext) -> str:
+        """Build prompt for orchestrator.
 
         Args:
-            tool_call: The tool call to execute
+            context: Current conversation context
 
         Returns:
-            ConversationTurn with result
+            Formatted prompt string
         """
-        start = time.perf_counter()
-
-        try:
-            result = self.tool_registry.execute(tool_call)
-        except Exception as e:
-            result = ToolResult(
-                success=False,
-                output="",
-                error=str(e),
-            )
-
-        latency_ms = (time.perf_counter() - start) * 1000
-        cost_usd = result.metadata.get("cost_usd", 0.0)
-
-        return ConversationTurn(
-            tool_call=tool_call,
-            result=result,
-            cost_usd=cost_usd,
-            latency_ms=latency_ms,
+        context_string = context.build_prompt_context(self.config)
+        return ORCHESTRATOR_PROMPT.format(
+            original_query=context.original_query,
+            context_string=context_string
         )
 
-    def _record_final_answer(self, context: ConversationContext, decision: OrchestratorDecision) -> None:
-        """Record final answer in context.
+    def _synthesize_from_context(self, context: ConversationContext) -> OrchestratorDecision:
+        """Create final decision from accumulated context.
 
         Args:
-            context: Conversation context to update
-            decision: Decision with final answer
+            context: Conversation context with accumulated turns
+
+        Returns:
+            OrchestratorDecision with synthesized final answer
         """
-        tool_call = ToolCall(
-            name="final_answer",
-            parameters={
-                "answer": decision.final_answer or "",
-                "sources": decision.sources or [],
-            },
-        )
+        # Gather all outputs
+        outputs = []
+        for turn in context.turns:
+            if turn.result.success:
+                outputs.append(turn.result.output)
 
-        result = ToolResult(
-            success=True,
-            output=decision.final_answer or "",
-            metadata={"sources": decision.sources or []},
-        )
-
-        turn = ConversationTurn(
-            tool_call=tool_call,
-            result=result,
-            cost_usd=0.0,
-            latency_ms=0.0,
-        )
-
-        context.turns.append(turn)
-
-    def _provide_fallback_answer(self, context: ConversationContext) -> None:
-        """Provide fallback answer when orchestration stops early.
-
-        Args:
-            context: Conversation context to update
-        """
-        # Find best successful result
-        successful_results = [t for t in context.turns if t.result.success]
-
-        if not successful_results:
-            # No successful results, provide error message
-            answer = (
-                f"Unable to complete the query. "
-                f"Encountered {len(context.errors)} errors. "
-                f"Please try a different approach."
-            )
-            sources = []
+        if outputs:
+            answer = "\n\n".join(outputs[-2:])  # Last 2 outputs
         else:
-            # Use the most recent successful result
-            best = successful_results[-1]
-            answer = best.result.output
-            sources = [best.tool_call.name]
+            answer = "Unable to complete the task. The orchestrator encountered errors or exceeded budget limits."
 
-        tool_call = ToolCall(
-            name="final_answer",
-            parameters={"answer": answer, "sources": sources},
+        return OrchestratorDecision(
+            reasoning="Synthesized from accumulated context",
+            tool_calls=[],
+            is_final=True,
+            final_answer=answer,
+            sources=[str(t.tool_call.name) for t in context.turns]
         )
 
-        result = ToolResult(
-            success=True,
-            output=answer,
-            metadata={"sources": sources, "fallback": True},
+    def _force_final_answer(self, context: ConversationContext) -> OrchestratorDecision:
+        """Force final answer when stuck in loop.
+
+        Args:
+            context: Conversation context
+
+        Returns:
+            OrchestratorDecision with forced final answer
+        """
+        # Try to use the last successful result
+        for turn in reversed(context.turns):
+            if turn.result.success:
+                return OrchestratorDecision(
+                    reasoning="Using last successful result",
+                    tool_calls=[],
+                    is_final=True,
+                    final_answer=turn.result.output,
+                    sources=[turn.tool_call.name]
+                )
+
+        return OrchestratorDecision(
+            reasoning="No successful results available",
+            tool_calls=[],
+            is_final=True,
+            final_answer="I was unable to complete this task after multiple attempts. The task may require additional information or capabilities.",
+            sources=[]
         )
 
-        turn = ConversationTurn(
-            tool_call=tool_call,
-            result=result,
-            cost_usd=0.0,
-            latency_ms=0.0,
+    def _fallback_to_strong_model(self, query: str) -> OrchestratorDecision:
+        """Fallback to strong model when orchestrator fails.
+
+        Args:
+            query: Original query
+
+        Returns:
+            OrchestratorDecision with strong model's answer
+        """
+        try:
+            client = self.infra.get_client("claude-sonnet", tier="strong")
+            response = client.complete(query)
+
+            return OrchestratorDecision(
+                reasoning="Fallback to strong model",
+                tool_calls=[],
+                is_final=True,
+                final_answer=response.content,
+                sources=["strong_model_fallback"]
+            )
+        except Exception:
+            return OrchestratorDecision(
+                reasoning="All fallbacks failed",
+                tool_calls=[],
+                is_final=True,
+                final_answer="I'm sorry, but I encountered an error while processing your request.",
+                sources=[]
+            )
+
+    def _format_error_for_context(self, tool_call: ToolCall, error: Exception) -> str:
+        """Format error for inclusion in context.
+
+        Args:
+            tool_call: The tool call that failed
+            error: The exception that occurred
+
+        Returns:
+            Formatted error string
+        """
+        return f"""Tool: {tool_call.name}
+Params: {tool_call.parameters}
+Error: {type(error).__name__}: {str(error)[:200]}
+
+Consider: Try different parameters, use a different tool, or use strong_model as fallback."""
+
+    def _build_routing_decision(self, context: ConversationContext, orchestrator_decision: OrchestratorDecision) -> RoutingDecision:
+        """Build RoutingDecision for compatibility with existing API.
+
+        Args:
+            context: Conversation context
+            orchestrator_decision: The orchestrator's final decision
+
+        Returns:
+            RoutingDecision compatible with existing RouterResult
+        """
+        # Determine which lane was primarily used
+        if context.turns:
+            last_tool = context.turns[-1].tool_call.name
+            if last_tool == "fast_model":
+                lane = Lane.FAST
+            elif last_tool == "strong_model":
+                lane = Lane.REASONING
+            elif last_tool == "code_executor":
+                lane = Lane.AGENTIC
+            else:
+                lane = Lane.REASONING  # Default
+        else:
+            lane = Lane.REASONING  # Default for orchestrator
+
+        return RoutingDecision(
+            lane=lane,
+            complexity_score=0.5,  # Could compute from context
+            signals=None,  # Could extract from context
+            reason=orchestrator_decision.reasoning if orchestrator_decision else "Orchestrator routing",
+            confidence=0.8,  # Could compute from tool success rates
         )
 
-        context.turns.append(turn)
+
+class _ExistingInfrastructure:
+    """Default adapter for PAL-Router infrastructure when none provided."""
+
+    def __init__(self):
+        """Initialize with default clients."""
+        from pal_router.models import get_client
+        self._get_client = get_client
+
+    def get_client(self, model_name: str, tier: str = "fast"):
+        """Get a model client.
+
+        Args:
+            model_name: Name of the model
+            tier: "fast" or "strong"
+
+        Returns:
+            ModelClient instance
+        """
+        return self._get_client(
+            {"name": model_name, "cost_per_1k_input": 0.001, "cost_per_1k_output": 0.001},
+            provider="openai"  # Default
+        )
