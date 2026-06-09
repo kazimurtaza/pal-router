@@ -45,3 +45,4 @@ ENV/
 # Eval results
 eval/results/*.json
 prompt.md
+.venv/
