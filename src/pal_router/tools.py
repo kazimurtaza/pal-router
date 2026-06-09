@@ -34,8 +34,8 @@ DEFAULT_TOOLS = [
                     },
                     "model": {
                         "type": "string",
-                        "enum": ["gpt-4o-mini", "claude-haiku", "llama-8b"],
-                        "default": "llama-8b"
+                        "enum": ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"],
+                        "default": "llama-3.1-8b-instant"
                     }
                 },
                 "required": ["query"]
@@ -59,8 +59,8 @@ DEFAULT_TOOLS = [
                     },
                     "model": {
                         "type": "string",
-                        "enum": ["gpt-4o", "claude-sonnet", "llama-70b"],
-                        "default": "llama-70b"
+                        "enum": ["llama-3.3-70b-versatile"],
+                        "default": "llama-3.3-70b-versatile"
                     }
                 },
                 "required": ["query"]
@@ -84,8 +84,8 @@ DEFAULT_TOOLS = [
                     },
                     "model": {
                         "type": "string",
-                        "enum": ["gpt-4o-mini", "claude-haiku", "qwen-coder"],
-                        "default": "gpt-4o-mini"
+                        "enum": ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"],
+                        "default": "llama-3.1-8b-instant"
                     },
                     "timeout": {
                         "type": "integer",
@@ -196,7 +196,7 @@ class ToolRegistry:
 
     def _execute_fast_model(self, params: dict) -> ToolResult:
         """Execute fast_model tool."""
-        model_key = params.get("model", "llama-8b")
+        model_key = params.get("model", "llama-3.1-8b-instant")
         model_name = self.config.fast_models.get(model_key, model_key)
 
         if not hasattr(self.infra, "get_client"):
@@ -219,7 +219,7 @@ class ToolRegistry:
 
     def _execute_strong_model(self, params: dict) -> ToolResult:
         """Execute strong_model tool."""
-        model_key = params.get("model", "llama-70b")
+        model_key = params.get("model", "llama-3.3-70b-versatile")
         model_name = self.config.strong_models.get(model_key, model_key)
         client = self.infra.get_client(model_name, tier="strong")
 
@@ -239,7 +239,7 @@ class ToolRegistry:
 
     def _execute_code(self, params: dict) -> ToolResult:
         """Execute code_executor tool using existing AgenticWorkflow."""
-        model_key = params.get("model", "gpt-4o-mini")
+        model_key = params.get("model", "llama-3.1-8b-instant")
         model_name = self.config.code_models.get(model_key, model_key)
         client = self.infra.get_client(model_name, tier="fast")
 
@@ -274,10 +274,10 @@ class ToolRegistry:
         )
 
     def _execute_search(self, params: dict) -> ToolResult:
-        """Execute web_search tool.
+        """Execute web_search tool using Tavily API.
 
-        Note: This is an intentional placeholder pending search provider integration.
-        TODO: Implement actual search provider (Tavily, SerpAPI, Brave, etc.)
+        Uses Tavily Search API for AI-optimized search results.
+        API key from config tavily_api_key or TAVILY_API_KEY env var.
         """
         query = params.get("query")
         if query is None:
@@ -285,12 +285,78 @@ class ToolRegistry:
 
         max_results = params.get("max_results", 5)
 
-        # Placeholder implementation - search provider to be integrated later
-        return ToolResult(
-            success=True,
-            output=f"Search results for: {query} (TODO: implement search provider)",
-            metadata={"sources": [], "query": query}
-        )
+        # Get API key from config or environment
+        api_key = self.config.tavily_api_key if hasattr(self.config, 'tavily_api_key') else None
+        if not api_key:
+            import os
+            api_key = os.getenv("TAVILY_API_KEY")
+
+        if not api_key:
+            return ToolResult(
+                success=False,
+                output="Web search not available: TAVILY_API_KEY not configured",
+                metadata={"query": query, "error": "missing_api_key"}
+            )
+
+        try:
+            from tavily import TavilyClient
+            client = TavilyClient(api_key=api_key)
+
+            # Perform search optimized for AI agents
+            search_result = client.search(
+                query=query,
+                max_results=max_results,
+                search_depth="basic",  # "basic" or "advanced"
+                include_answer=False,  # We'll format results ourselves
+                include_raw_content=False,
+                include_images=False,
+            )
+
+            # Format results for the orchestrator
+            results = search_result.get("results", [])
+            if not results:
+                return ToolResult(
+                    success=True,
+                    output=f"No search results found for: {query}",
+                    metadata={"sources": [], "query": query}
+                )
+
+            # Build formatted output
+            formatted_parts = []
+            sources = []
+
+            for i, result in enumerate(results[:max_results], 1):
+                title = result.get("title", "Untitled")
+                url = result.get("url", "")
+                content = result.get("content", "")
+
+                formatted_parts.append(f"[{i}] {title}\n{content}")
+                sources.append(url)
+
+            output = f"Search results for '{query}':\n\n" + "\n\n".join(formatted_parts)
+
+            return ToolResult(
+                success=True,
+                output=output,
+                metadata={
+                    "sources": sources,
+                    "query": query,
+                    "results_count": len(results)
+                }
+            )
+
+        except ImportError:
+            return ToolResult(
+                success=False,
+                output="Web search not available: tavily-python package not installed",
+                metadata={"query": query, "error": "missing_package"}
+            )
+        except Exception as e:
+            return ToolResult(
+                success=False,
+                output=f"Search failed: {str(e)}",
+                metadata={"query": query, "error": str(e)}
+            )
 
     def _execute_final_answer(self, params: dict) -> ToolResult:
         """Final answer is just returned, no execution needed."""
@@ -349,6 +415,5 @@ def parse_orchestrator_response(
         tool_calls=tool_calls,
         is_final=is_final,
         final_answer=final_answer,
-        sources=sources,
-        raw_response=str(message)
+        sources=sources
     )

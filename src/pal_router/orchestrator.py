@@ -24,11 +24,8 @@ if TYPE_CHECKING:
     pass
 
 
-# Orchestrator prompt template
-ORCHESTRATOR_PROMPT = """You are an orchestrator that solves tasks by calling tools.
-
-## Original Question
-{original_query}
+# Orchestrator system prompt - defines the role and available tools
+ORCHESTRATOR_SYSTEM_PROMPT = """You are an orchestrator that solves tasks by calling tools.
 
 ## Available Tools
 - fast_model: Simple facts, definitions. Fast & cheap.
@@ -37,13 +34,19 @@ ORCHESTRATOR_PROMPT = """You are an orchestrator that solves tasks by calling to
 - web_search: Current information, facts to verify.
 - final_answer: Deliver your answer (REQUIRED to complete).
 
-{context_string}
-
 ## Instructions
 1. Analyze what's still needed to answer the question
 2. Choose ONE tool that makes progress
 3. Do NOT repeat failed approaches
 4. When you have enough information, use final_answer
+
+Your job is to coordinate tools to solve the user's question efficiently."""
+
+# User prompt template - contains the specific query and context
+ORCHESTRATOR_USER_PROMPT = """## Original Question
+{original_query}
+
+{context_string}
 
 What tool do you want to use?"""
 
@@ -137,18 +140,14 @@ class OrchestratorRouter:
                     result = self.tool_registry.execute(tool_call)
                     context.turns.append(ConversationTurn(
                         tool_call=tool_call,
-                        result=result,
-                        cost_usd=result.metadata.get("cost_usd", 0),
-                        latency_ms=result.metadata.get("latency_ms", 0)
+                        result=result
                     ))
                 except Exception as e:
                     error_msg = self._format_error_for_context(tool_call, e)
                     context.errors.append(error_msg)
                     context.turns.append(ConversationTurn(
                         tool_call=tool_call,
-                        result=ToolResult(success=False, output="", error=str(e)),
-                        cost_usd=0,
-                        latency_ms=0
+                        result=ToolResult(success=False, output="", metadata={"error": str(e)})
                     ))
 
             # Check if should continue
@@ -185,28 +184,31 @@ class OrchestratorRouter:
         Returns:
             OrchestratorDecision with tool calls and reasoning
         """
-        prompt = self._build_orchestrator_prompt(context)
+        user_prompt = self._build_orchestrator_user_prompt(context)
 
         response = self._orchestrator.chat.completions.create(
             model=self.config.model_path,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {"role": "system", "content": ORCHESTRATOR_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
             tools=self.config.tools,
             temperature=1.0,  # NVIDIA uses temp=1 for orchestrator
         )
 
         return parse_orchestrator_response(response, self.config.tools)
 
-    def _build_orchestrator_prompt(self, context: ConversationContext) -> str:
-        """Build prompt for orchestrator.
+    def _build_orchestrator_user_prompt(self, context: ConversationContext) -> str:
+        """Build user prompt for orchestrator.
 
         Args:
             context: Current conversation context
 
         Returns:
-            Formatted prompt string
+            Formatted user prompt string
         """
         context_string = context.build_prompt_context(self.config)
-        return ORCHESTRATOR_PROMPT.format(
+        return ORCHESTRATOR_USER_PROMPT.format(
             original_query=context.original_query,
             context_string=context_string
         )
@@ -266,10 +268,8 @@ class OrchestratorRouter:
             reasoning="No successful results available",
             tool_calls=[],
             is_final=True,
-            final_answer=(
-                "I was unable to complete this task after multiple attempts. "
-                "The task may require additional information or capabilities."
-            ),
+            final_answer="I was unable to complete this task after multiple attempts. "
+            "The task may require additional information or capabilities.",
             sources=[]
         )
 
@@ -360,24 +360,65 @@ Consider: Try different parameters, use a different tool, or use strong_model as
 
 
 class _ExistingInfrastructure:
-    """Default adapter for PAL-Router infrastructure when none provided."""
+    """Default adapter for PAL-Router infrastructure when none provided.
 
-    def __init__(self):
-        """Initialize with default clients."""
+    Uses Groq (free tier) by default for fast_model and strong_model.
+    Falls back to local llama.cpp if Groq API key not set.
+    """
+
+    def __init__(self, provider: str = "groq"):
+        """Initialize with default clients.
+
+        Args:
+            provider: Default provider ("groq", "gemini", "llamacpp", "openai")
+        """
         from pal_router.models import get_client
+        from pal_router.config import GROQ_LLAMA_8B, GROQ_LLAMA_70B
+
         self._get_client = get_client
+        self._provider = provider
+
+        # Model configs for different providers
+        self._model_configs = {
+            "groq": {
+                "fast": GROQ_LLAMA_8B,
+                "strong": GROQ_LLAMA_70B,
+            },
+            "openai": {
+                "fast": {"name": "gpt-4o-mini", "cost_per_1k_input": 0.00015, "cost_per_1k_output": 0.0006},
+                "strong": {"name": "gpt-4o", "cost_per_1k_input": 0.005, "cost_per_1k_output": 0.015},
+            },
+        }
 
     def get_client(self, model_name: str, tier: str = "fast"):
         """Get a model client.
 
         Args:
-            model_name: Name of the model
+            model_name: Name of the model (or key from model_mappings)
             tier: "fast" or "strong"
 
         Returns:
             ModelClient instance
         """
-        return self._get_client(
-            {"name": model_name, "cost_per_1k_input": 0.001, "cost_per_1k_output": 0.001},
-            provider="openai"  # Default
-        )
+        import os
+        from types import SimpleNamespace
+
+        # Check if Groq API key is available
+        groq_key = os.getenv("GROQ_API_KEY")
+        use_groq = self._provider == "groq" and groq_key
+
+        if use_groq:
+            # Use Groq for fast inference (free tier)
+            from pal_router.config import GROQ_LLAMA_8B, GROQ_LLAMA_70B
+            config = GROQ_LLAMA_8B if tier == "fast" else GROQ_LLAMA_70B
+            return self._get_client(config, provider="groq")
+        else:
+            # Fallback to llama.cpp (local)
+            from pal_router.models import LlamaCppClient
+            base_url = os.getenv("LLAMACPP_URL", "http://localhost:8080/v1")
+            config = SimpleNamespace(
+                name=model_name,
+                cost_per_1k_input=0.0,
+                cost_per_1k_output=0.0,
+            )
+            return LlamaCppClient(config, base_url=base_url)

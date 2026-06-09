@@ -3,12 +3,13 @@
 from pal_router.agentic import AgenticResult, AgenticWorkflow
 from pal_router.complexity import ComplexitySignals, estimate_complexity
 from pal_router.config import Config
-from pal_router.conversation import ConversationContext, ConversationTurn, OrchestratorDecision, ToolCall, ToolResult
+from pal_router.conversation import ConversationContext, ConversationTurn, ToolCall, ToolResult
 from pal_router.models import CompletionResult, ModelClient, get_client, FallbackClient
-from pal_router.orchestrator import OrchestratorConfig, OrchestratorRouter
+from pal_router.orchestrator import OrchestratorConfig, OrchestratorDecision, OrchestratorRouter
 from pal_router.presets import (
     create_fast_router,
     create_groq_only_router,
+    create_groq_orchestrator_router,
     create_local_only_router,
     create_orchestrator_router,
     create_quality_router,
@@ -40,6 +41,7 @@ __all__ = [
     "ToolResult",
     "create_fast_router",
     "create_groq_only_router",
+    "create_groq_orchestrator_router",
     "create_local_only_router",
     "create_orchestrator_router",
     "create_quality_router",

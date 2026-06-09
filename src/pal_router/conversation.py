@@ -1,4 +1,4 @@
-"""Conversation context and data structures for orchestrator router."""
+"""PAL-Router conversation and configuration dataclasses."""
 
 from __future__ import annotations
 
@@ -6,35 +6,24 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 
-@dataclass
-class ToolCall:
-    """Single tool invocation request from orchestrator."""
-    name: str  # "fast_model", "code_executor", etc.
-    parameters: dict  # {"query": "..."} or {"problem": "...", "model": "..."}
-    reasoning: str | None = None  # Why this tool (if provided)
+def get_llamacpp_url() -> str:
+    """Get llama.cpp server URL from environment or default."""
+    import os
+
+    return os.getenv("LLAMACPP_URL", "http://localhost:8080/v1")
 
 
 @dataclass
-class ToolResult:
-    """Result from executing a tool."""
-    success: bool
-    output: str
-    error: str | None = None
-    metadata: dict = field(default_factory=dict)  # cost, latency, sources, etc.
-
-
-@dataclass
-class ConversationTurn:
-    """One round of orchestrator -> tool execution -> result."""
-    tool_call: ToolCall
-    result: ToolResult
-    cost_usd: float
-    latency_ms: float
+class ModelConfig:
+    """Configuration for a single model."""
+    name: str
+    cost_per_1k_input: float  # USD
+    cost_per_1k_output: float  # USD
 
 
 @dataclass
 class OrchestratorConfig:
-    """Configuration for the orchestrator router."""
+    """Configuration for orchestrator router."""
     # Model settings
     model_path: str = "nvidia/Nemotron-Orchestrator-8B"
     backend: Literal["llamacpp", "vllm", "transformers"] = "llamacpp"
@@ -45,119 +34,180 @@ class OrchestratorConfig:
     max_cost_usd: float = 0.10
     max_latency_ms: float = 10000
 
+    # API keys for external tools
+    tavily_api_key: str | None = None  # Tavily Search API key (or set TAVILY_API_KEY env var)
+
     # Tool settings - populated in tools.py
     tools: list[dict] = field(default_factory=list)
 
-    # Model mappings (tier -> actual model)
+    # Groq models - using actual Groq model names directly
+    # Orchestrator uses these exact names in tool_calls
     fast_models: dict[str, str] = field(default_factory=lambda: {
-        "gpt-4o-mini": "gpt-4o-mini",
-        "claude-haiku": "claude-3-haiku-20240307",
-        "llama-8b": "llama-3.1-8b-instant",
+        "llama-3.1-8b-instant": "llama-3.1-8b-instant",  # Fast tier
+        "llama-3.3-70b-versatile": "llama-3.3-70b-versatile",  # Strong tier
     })
+
     strong_models: dict[str, str] = field(default_factory=lambda: {
-        "gpt-4o": "gpt-4o",
-        "claude-sonnet": "claude-3-5-sonnet-20241022",
-        "llama-70b": "llama-3.3-70b-versatile",
+        "llama-3.3-70b-versatile": "llama-3.3-70b-versatile",  # Best quality
     })
+
+    # Code models - Groq models for code execution
+    # Uses same names as fast_models for consistency
     code_models: dict[str, str] = field(default_factory=lambda: {
-        "gpt-4o-mini": "gpt-4o-mini",
-        "claude-haiku": "claude-3-haiku-20240307",
-        "qwen-coder": "qwen/qwen2.5-coder-32b-instruct",
+        "llama-3.1-8b-instant": "llama-3.1-8b-instant",  # Fast code execution
+        "llama-3.3-70b-versatile": "llama-3.3-70b-versatile",  # Stronger code/complex tasks
     })
-
-
-@dataclass
-class ConversationContext:
-    """Accumulated context across the conversation."""
-    original_query: str
-    turns: list[ConversationTurn] = field(default_factory=list)
-    errors: list[str] = field(default_factory=list)
-    has_retried_no_tool: bool = False
-
-    @property
-    def total_cost(self) -> float:
-        """Total cost across all turns."""
-        return sum(t.cost_usd for t in self.turns)
-
-    @property
-    def total_latency(self) -> float:
-        """Total latency across all turns."""
-        return sum(t.latency_ms for t in self.turns)
-
-    def is_stuck(self) -> bool:
-        """Detect stuck-in-loop patterns."""
-        if len(self.turns) < 3:
-            return False
-        last_3_tools = [t.tool_call.name for t in self.turns[-3:]]
-        return len(set(last_3_tools)) == 1
-
-    def budget_exceeded(self, config: OrchestratorConfig) -> bool:
-        """Check if budgets exceeded."""
-        return (
-            self.total_cost > config.max_cost_usd
-            or self.total_latency > config.max_latency_ms
-        )
-
-    def build_prompt_context(self, config: OrchestratorConfig) -> str:
-        """Build context string for next orchestrator call."""
-        parts = []
-
-        # Original query
-        parts.append(f"## Query\n{self.original_query}")
-
-        # Budget status
-        remaining_cost = config.max_cost_usd - self.total_cost
-        remaining_rounds = config.max_rounds - len(self.turns)
-        parts.append(f"## Budget\nRemaining: ${remaining_cost:.4f}, {remaining_rounds} rounds")
-
-        # What's been tried
-        if self.turns:
-            tried = []
-            for t in self.turns:
-                params = t.tool_call.parameters
-                key = params.get("query") or params.get("problem") or str(params)
-                tried.append(f"{t.tool_call.name}({key[:50]}...)")
-            parts.append("## Already Tried\n" + "\n".join(f"- {t}" for t in tried))
-
-        # Results by type
-        code_results = [
-            t for t in self.turns
-            if t.tool_call.name == "code_executor" and t.result.success
-        ]
-        if code_results:
-            outputs = "\n".join(f"```\n{t.result.output}\n```" for t in code_results[-2:])
-            parts.append("## Code Results\n" + outputs)
-
-        search_results = [
-            t for t in self.turns
-            if t.tool_call.name == "web_search" and t.result.success
-        ]
-        if search_results:
-            outputs = "\n".join(f"- {t.result.output[:200]}" for t in search_results[-2:])
-            parts.append("## Search Results\n" + outputs)
-
-        model_results = [
-            t for t in self.turns
-            if t.tool_call.name in ("fast_model", "strong_model") and t.result.success
-        ]
-        if model_results:
-            outputs = "\n".join(f"- {t.result.output[:300]}" for t in model_results[-2:])
-            parts.append("## Model Responses\n" + outputs)
-
-        # Errors
-        if self.errors:
-            error_list = "\n".join(f"- {e}" for e in self.errors[-2:])
-            parts.append("## Errors (avoid these)\n" + error_list)
-
-        return "\n\n".join(parts)
 
 
 @dataclass
 class OrchestratorDecision:
-    """Full output from orchestrator for one round."""
-    reasoning: str  # Free-form thinking before tool calls
-    tool_calls: list[ToolCall]  # Tools to execute (usually 1)
-    is_final: bool  # Is final_answer included?
-    final_answer: str | None = None  # Answer if is_final=True
-    sources: list[str] | None = None  # Sources if final_answer
-    raw_response: str | None = None  # Raw LLM output for debugging
+    """Decision from orchestrator model."""
+
+    reasoning: str  # Orchestrator's reasoning
+    tool_calls: list[ToolCall]  # Tools to execute
+    is_final: bool = False  # Whether this ends with final_answer
+    final_answer: str | None = None  # Final answer when is_final=True
+    sources: list[str] | None = None  # Sources/tools used
+
+
+@dataclass
+class ToolCall:
+    """Represents a tool call from orchestrator."""
+
+    name: str  # Tool name (fast_model, strong_model, code_executor, web_search, final_answer)
+    parameters: dict  # Tool parameters
+    reasoning: str | None = None  # Orchestrator's reasoning for this call
+
+
+@dataclass
+class ToolResult:
+    """Result from executing a tool."""
+
+    success: bool
+    output: str
+    metadata: dict  # Cost, latency, sources, etc.
+
+
+@dataclass
+class ConversationTurn:
+    """Single turn in conversation."""
+
+    tool_call: ToolCall
+    result: ToolResult
+    reasoning: str | None = None
+
+
+@dataclass
+class ConversationContext:
+    """Accumulated context across conversation."""
+    original_query: str
+    turns: list[ConversationTurn] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    has_retried_no_tool: bool = False  # Track if we've tried answering without tools
+
+    @property
+    def total_cost(self) -> float:
+        """Calculate total cost from all turns."""
+        return sum(
+            turn.result.metadata.get("cost_usd", 0)
+            for turn in self.turns
+            if turn.result.success
+        )
+
+    def build_prompt_context(self, config: OrchestratorConfig | None = None) -> str:
+        """Build prompt context for the orchestrator from conversation history.
+
+        Args:
+            config: Configuration with tool definitions
+            For backward compatibility, config can be None
+
+        Returns:
+            Formatted prompt string for orchestrator
+        """
+        from pal_router.tools import DEFAULT_TOOLS
+
+        tools = config.tools if config else DEFAULT_TOOLS
+        tool_list = "\n".join([
+            f"- **{tool['function']['name']}**: {tool['function']['description']}"
+            for tool in tools
+        ])
+
+        turn_summary = ""
+        if self.turns:
+            for i, turn in enumerate(self.turns[-2:], 1):  # Last 2 turns
+                status = "✓" if turn.result.success else "✗"
+                turn_summary += f"**Turn {i}** - {turn.tool_call.name}: {status}\n"
+
+        steps_so_far = len(self.turns)
+        return (
+            f"## Original Question\n{self.original_query}\n\n"
+            f"## Recent Conversation\n{turn_summary}\n\n"
+            f"## Available Tools\n{tool_list}\n\n"
+            f"## Current Status\n"
+            f"We've taken {steps_so_far} step(s) so far. To solve this, I recommend:\n"
+            "1. Use fast_model for simple factual questions\n"
+            "2. Choose ONE tool that makes progress\n"
+            "3. Do NOT repeat failed approaches\n"
+            "4. When you have enough information, use final_answer\n\n"
+            "What tool do you want to use?\n"
+        )
+
+    def budget_exceeded(self, config: OrchestratorConfig) -> bool:
+        """Check if budget limits have been exceeded.
+
+        Args:
+            config: Orchestrator configuration with max_rounds, max_cost, max_latency
+
+        Returns:
+            True if any budget limit exceeded
+        """
+        # Check round limit
+        if len(self.turns) >= config.max_rounds:
+            return True
+
+        # Check if we've tried answering without tools (fallback prevention)
+        if self.has_retried_no_tool:
+            return True
+
+        # Check cost accumulation
+        total_cost = sum(
+            turn.result.metadata.get("cost_usd", 0) for turn in self.turns
+            if turn.result.success
+        )
+        if total_cost > config.max_cost_usd:
+            return True
+
+        # Check latency
+        total_latency = sum(
+            turn.result.metadata.get("latency_ms", 0) for turn in self.turns
+            if turn.result.success
+        )
+        if total_latency > config.max_latency_ms:
+            return True
+
+        return False
+
+    def is_stuck(self) -> bool:
+        """Check if orchestrator is stuck in a loop.
+
+        Returns:
+            True if stuck (same tool failing repeatedly or no progress)
+        """
+        # Check if we have recent errors
+        if self.errors and len(self.errors) > 2:
+            return True
+
+        # Check if we've made multiple rounds without final answer
+        if len(self.turns) > 3 and not any(
+            turn.result.success and turn.tool_call.name == "final_answer"
+            for turn in self.turns[-3:]
+        ):
+            return True
+
+        # Check if same tool keeps failing
+        recent_tools = [turn.tool_call.name for turn in self.turns[-3:]]
+        if len(recent_tools) >= 3 and len(set(recent_tools)) == 1:
+            # Same tool used 3+ times in a row
+            return True
+
+        return False

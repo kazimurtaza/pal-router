@@ -164,10 +164,72 @@ def create_orchestrator_router(
     )
 
 
+def create_groq_orchestrator_router(
+    groq_api_key: str | None = None,
+    model_url: str | None = None,
+    model_path: str = "nvidia_Orchestrator-8B-Q8_0.gguf",
+) -> OrchestratorRouter:
+    """Create an Orchestrator-8B router with Groq-powered tools (RECOMMENDED).
+
+    This is the recommended configuration for production use:
+    - Orchestrator-8B: Routes queries to appropriate tools (local llama.cpp)
+    - fast_model: Groq Llama 3.1 8B (FREE, ~50ms latency)
+    - strong_model: Groq Llama 3.3 70B (FREE, ~100ms latency)
+    - code_executor: Groq + Python execution
+    - web_search: Tavily Search API (FREE tier available)
+
+    Total cost: $0 (all free tiers!)
+
+    Requires:
+        - GROQ_API_KEY environment variable (get free key at https://groq.com/)
+        - TAVILY_API_KEY environment variable (get free key at https://tavily.com/)
+        - Local llama.cpp server running Orchestrator-8B model
+
+    Args:
+        groq_api_key: Groq API key. If None, uses GROQ_API_KEY env var.
+        model_url: llama.cpp server URL for Orchestrator-8B model.
+                   Defaults to LLAMACPP_URL env var or http://localhost:8080/v1
+        model_path: Name/path of the Orchestrator-8B GGUF model
+
+    Returns:
+        Configured OrchestratorRouter instance with Groq infrastructure
+
+    Example:
+        from pal_router import create_groq_orchestrator_router
+
+        router = create_groq_orchestrator_router()
+        result = router.route_and_execute("What is the capital of France?")
+        print(result.answer)  # "The capital of France is Paris..."
+    """
+    from pal_router.conversation import OrchestratorConfig
+    from pal_router.orchestrator import _ExistingInfrastructure
+
+    url = model_url or get_llamacpp_url()
+    groq_key = groq_api_key or os.getenv("GROQ_API_KEY")
+
+    if not groq_key:
+        raise ValueError(
+            "GROQ_API_KEY not found. Set it as environment variable or pass groq_api_key parameter. "
+            "Get a free key at: https://groq.com/"
+        )
+
+    config = OrchestratorConfig(
+        model_url=url,
+        model_path=model_path,
+    )
+
+    # Use Groq-powered infrastructure
+    return OrchestratorRouter(
+        config=config,
+        existing_infra=_ExistingInfrastructure(provider="groq"),
+    )
+
+
 __all__ = [
     "create_fast_router",
     "create_groq_only_router",
     "create_local_only_router",
     "create_orchestrator_router",
     "create_quality_router",
+    "create_groq_orchestrator_router",  # NEW: Recommended Groq + Orchestrator setup
 ]
